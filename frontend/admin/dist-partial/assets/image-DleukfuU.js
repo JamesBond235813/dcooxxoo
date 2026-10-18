@@ -1,0 +1,1 @@
+function i(r){if(!r)return"";if(r.startsWith("http://")||r.startsWith("https://"))return r;const t="",e=r.startsWith("/")?r:`/${r}`;return`${t}${e}`}function s(r){if(!r)return"";let t="";return Array.isArray(r)?t=r[0]||"":r.images&&Array.isArray(r.images)&&(t=r.images[0]||""),i(t)}export{i as a,s as g};

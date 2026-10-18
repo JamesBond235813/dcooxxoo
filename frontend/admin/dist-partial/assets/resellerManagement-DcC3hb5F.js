@@ -1,0 +1,1 @@
+const E="pending_review",S="active",n="rejected",_="disabled",R="pending_review",c="active",i="disabled",r=e=>e===E?"pendingReview":e===S?"active":e===n?"rejected":e===_?"disabled":"unknown",o=e=>({canApprove:e===E||e===n,canReject:e===E,canDisable:e===E||e===S||e===n,canRestore:e===_}),L=e=>({canApprove:e===R||e===i,canDisable:e===R||e===c});export{r as a,L as b,o as g};

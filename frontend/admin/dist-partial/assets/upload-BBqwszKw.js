@@ -1,0 +1,1 @@
+const i=10485760;function n(t){return`${Math.floor(t/1024/1024)} MB`}function r(t,c=10485760){const s=[],o=[];return t.forEach(e=>{e.size>c?o.push(e):s.push(e)}),{accepted:s,rejected:o}}export{i as D,n as f,r as s};

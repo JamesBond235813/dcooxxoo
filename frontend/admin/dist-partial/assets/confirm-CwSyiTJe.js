@@ -1,0 +1,1 @@
+import{k as r,l as e}from"./index-f2vYj7RG.js";const o=(n,i)=>e.global.t(n),s=n=>{const i=r(),t=typeof n=="string"?{description:n}:n,c={title:t.title||o("admin.common.confirm"),description:t.description,confirmText:t.confirmText||o("admin.common.confirm"),cancelText:t.cancelText||o("admin.common.cancel"),variant:t.variant||"default"};return i.ask(c)};export{s as c};

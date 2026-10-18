@@ -1,0 +1,15 @@
+{
+  "id": "/",
+  "name": "GPT源头代充",
+  "short_name": "GPT源头代充",
+  "description": "GPT订阅源头代充，快捷访问订单与代理中心。",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#f8fafc",
+  "icons": [
+    { "src": "/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

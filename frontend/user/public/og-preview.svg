@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101b29"/>
+      <stop offset=".56" stop-color="#142b35"/>
+      <stop offset="1" stop-color="#123c38"/>
+    </linearGradient>
+    <linearGradient id="mint" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#63e4bb"/>
+      <stop offset="1" stop-color="#45b8d1"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef6ee"/>
+      <stop offset="1" stop-color="#dcece2"/>
+    </linearGradient>
+    <radialGradient id="aura">
+      <stop offset="0" stop-color="#55d5b4" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#55d5b4" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow" x="-.3" y="-.3" width="1.6" height="1.8">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#06151b" flood-opacity=".35"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="927" cy="310" r="350" fill="url(#aura)"/>
+  <path d="M0 528C213 442 352 672 610 560s356-170 590-85v155H0z" fill="#59d8b5" opacity=".035"/>
+  <path d="M0 559C215 473 365 679 632 577s357-167 568-90" fill="none" stroke="#78e2c6" stroke-opacity=".09" stroke-width="2"/>
+
+  <rect x="68" y="65" width="293" height="51" rx="25.5" fill="#ffffff" fill-opacity=".08" stroke="#ffffff" stroke-opacity=".17"/>
+  <circle cx="96" cy="90" r="8" fill="url(#mint)"/>
+  <text x="117" y="98" fill="#e1fff4" font-size="20" font-weight="650" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">源头直充 · 长期服务</text>
+
+  <text x="70" y="185" fill="#72e2c2" font-size="16" font-weight="700" letter-spacing="3.1" font-family="Arial, sans-serif">AI SUBSCRIPTION SERVICE</text>
+  <text x="64" y="284" fill="#f8fcfa" font-size="63" font-weight="760" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">GPT 源头代充</text>
+  <text x="70" y="342" fill="#d8e9e4" font-size="29" font-weight="520" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">用户自己的账号 · 官方直充</text>
+
+  <rect x="70" y="382" width="162" height="43" rx="21.5" fill="#ffffff" fill-opacity=".085" stroke="#ffffff" stroke-opacity=".18"/>
+  <path d="m91 403 7 7 13-15" fill="none" stroke="#72e2c2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="120" y="410" fill="#eaf7f2" font-size="17" font-weight="600" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">稳定 · 高效</text>
+  <rect x="245" y="382" width="191" height="43" rx="21.5" fill="#ffffff" fill-opacity=".085" stroke="#ffffff" stroke-opacity=".18"/>
+  <path d="m266 403 7 7 13-15" fill="none" stroke="#72e2c2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="295" y="410" fill="#eaf7f2" font-size="17" font-weight="600" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">一号一卡 · 安心订阅</text>
+
+  <path d="M70 474h495" stroke="#ffffff" stroke-opacity=".14"/>
+  <text x="70" y="519" fill="#a9c0bf" font-size="19" font-weight="500" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">代理轻松开启副业，拓展稳定现金流</text>
+  <text x="70" y="572" fill="#a9c0bf" font-size="17" font-family="Arial, sans-serif">ai.ooxxoo.cn</text>
+
+  <!-- Bespoke account-to-subscription emblem, inspired by the site's two AI service marks. -->
+  <g filter="url(#shadow)">
+    <rect x="694" y="115" width="428" height="397" rx="34" fill="url(#panel)"/>
+    <rect x="710" y="131" width="396" height="365" rx="26" fill="none" stroke="#ffffff" stroke-opacity=".8"/>
+    <rect x="729" y="151" width="209" height="37" rx="18.5" fill="#ffffff" fill-opacity=".72" stroke="#d2e6db"/>
+    <circle cx="750" cy="169.5" r="6" fill="#10b981"/>
+    <text x="766" y="175" fill="#0f604c" font-size="15" font-weight="700" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">用户自己的账号</text>
+
+    <circle cx="907" cy="322" r="128" fill="#d7eee2" opacity=".7"/>
+    <circle cx="907" cy="322" r="112" fill="none" stroke="#a7d7c2" stroke-width="2" stroke-dasharray="3 9"/>
+    <circle cx="907" cy="322" r="89" fill="#f5faf5" stroke="#acd9c4" stroke-width="2"/>
+
+    <!-- account card -->
+    <rect x="825" y="276" width="164" height="104" rx="18" fill="#fff" stroke="#c4ded1" stroke-width="2"/>
+    <circle cx="862" cy="311" r="16" fill="#d8f1e4"/>
+    <circle cx="862" cy="306" r="5" fill="#148568"/>
+    <path d="M852 320c2-7 18-7 20 0" fill="none" stroke="#148568" stroke-width="3" stroke-linecap="round"/>
+    <rect x="889" y="300" width="77" height="7" rx="3.5" fill="#b6d8c8"/>
+    <rect x="889" y="316" width="56" height="6" rx="3" fill="#d0e6da"/>
+    <rect x="849" y="345" width="116" height="19" rx="9.5" fill="#e7f5ec"/>
+    <path d="m861 354 4 4 7-8" fill="none" stroke="#138463" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="879" y="359" fill="#167456" font-size="11" font-weight="700" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">官方订阅已开通</text>
+
+    <!-- distinctive orbit and spark, echoing the home banner's AI marks -->
+    <path d="M830 241c29-39 83-55 129-39 44 16 73 58 73 104" fill="none" stroke="url(#mint)" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="830" cy="241" r="7" fill="#11a77c"/>
+    <circle cx="1032" cy="306" r="7" fill="#48b8d0"/>
+    <path d="M1017 220l5 14 14 5-14 5-5 14-5-14-14-5 14-5z" fill="#0d9b77"/>
+    <path d="M799 410l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#50b9a0" opacity=".8"/>
+    <rect x="820" y="427" width="174" height="38" rx="19" fill="#0c765b"/>
+    <circle cx="843" cy="446" r="8" fill="#83e7c6"/>
+    <path d="m839 446 3 3 5-6" fill="none" stroke="#0c765b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="860" y="452" fill="#f2fff9" font-size="15" font-weight="650" font-family="PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif">源头服务 · 可信赖</text>
+  </g>
+
+  <circle cx="1091" cy="105" r="4" fill="#c7fff1" opacity=".9"/>
+  <circle cx="659" cy="463" r="5" fill="#65dfbd" opacity=".8"/>
+</svg>

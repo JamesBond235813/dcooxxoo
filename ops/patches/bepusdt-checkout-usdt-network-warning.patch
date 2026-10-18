@@ -1,0 +1,76 @@
+diff --git a/static/checkout/official/assets/css/checkout.css b/static/checkout/official/assets/css/checkout.css
+index 46d54a0..652e3f1 100644
+--- a/static/checkout/official/assets/css/checkout.css
++++ b/static/checkout/official/assets/css/checkout.css
+@@ -134,6 +134,22 @@ body {
+     white-space: nowrap;
+ }
+
++.network-warning {
++    margin: 12px 24px 0;
++    padding: 12px 14px;
++    border: 2px solid #d97706;
++    border-radius: 10px;
++    background: #fff7ed;
++    color: #7c2d12;
++    font-size: 13px;
++    font-weight: 700;
++    line-height: 1.5;
++}
++.network-warning strong { display: block; font-size: 15px; }
++@media (prefers-color-scheme: dark) {
++    .network-warning { background: #431407; color: #ffedd5; border-color: #f59e0b; }
++}
++
+ .copy-trigger {
+     display: inline-flex;
+     align-items: center;
+diff --git a/static/checkout/official/assets/js/checkout.js b/static/checkout/official/assets/js/checkout.js
+index 7956521..d0ce6f4 100644
+--- a/static/checkout/official/assets/js/checkout.js
++++ b/static/checkout/official/assets/js/checkout.js
+@@ -679,6 +679,32 @@
+         document.getElementById('orderFiatQ').textContent = d.fiat || '';
+         document.getElementById('payAmountQ').textContent = amount + ' ' + currency;
+         document.getElementById('payNetworkQ').textContent = _t('networkPrefix', '区块网络 · ') + netName;
++        var networkWarning = document.getElementById('networkWarningQ');
++        var networkIdentity = (String(netName || '') + ' ' + String(network || '')).toUpperCase();
++        if (networkWarning && String(currency || '').toUpperCase() === 'USDT') {
++            var networkLabel = '';
++            var networkInstruction = '';
++            if (/TRC20|TRON/.test(networkIdentity)) {
++                networkLabel = 'TRON（TRC20）';
++                networkInstruction = '请只使用 TRON / TRC20 网络转账。';
++            } else if (/BEP20|BSC|BEP-20/.test(networkIdentity)) {
++                networkLabel = 'BNB Smart Chain（BEP20）';
++                networkInstruction = '请只使用 BNB Smart Chain / BEP20 网络转账。';
++            } else if (/ERC20|ETHEREUM|ETH/.test(networkIdentity)) {
++                networkLabel = 'Ethereum（ERC20）';
++                networkInstruction = '请只使用 Ethereum / ERC20 网络转账。';
++            }
++            if (networkLabel) {
++                networkWarning.innerHTML = '<strong>本单仅接收 ' + networkLabel + ' 网络 USDT</strong>' + networkInstruction + ' 发送到其他网络可能造成资产损失。';
++                networkWarning.style.display = 'block';
++            } else {
++                networkWarning.textContent = '请先核对所选区块链网络，再发送 USDT；网络不一致可能造成资产损失。';
++                networkWarning.style.display = 'block';
++            }
++        } else if (networkWarning) {
++            networkWarning.style.display = 'none';
++            networkWarning.textContent = '';
++        }
+         document.getElementById('orderIdQ').textContent = d.order_id || '--';
+         var paymentAddress = d.token || d.address || '';
+         renderWalletAddress(paymentAddress);
+diff --git a/static/checkout/official/views/checkout.html b/static/checkout/official/views/checkout.html
+index aad396d..dc17881 100644
+--- a/static/checkout/official/views/checkout.html
++++ b/static/checkout/official/views/checkout.html
+@@ -152,6 +152,7 @@
+             </div>
+         </div>
+     </div>
++    <div class="network-warning" id="networkWarningQ" role="alert" aria-live="polite" style="display:none;"></div>
+     <div style="padding: 12px 24px 0; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+         <div class="fee-notice">
+             <svg viewBox="0 0 16 16" fill="currentColor">

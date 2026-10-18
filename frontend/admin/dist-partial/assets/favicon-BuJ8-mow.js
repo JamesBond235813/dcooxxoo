@@ -1,0 +1,1 @@
+import{a as e}from"./image-DleukfuU.js";const o="site-favicon",i="/dj.svg";function c(n){const t=String(n||"").trim();return t?e(t):i}function I(n){const t=document.getElementById(o);t&&(t.href=c(n))}export{I as a};
