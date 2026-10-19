@@ -124,7 +124,7 @@ go test ./...
 
 禁止把本地仓库根目录 rsync 到生产源码目录，也禁止直接在脏的 `/opt/dujiao-next-src` 上编译发布。工作区可能包含未提交功能、旧于生产的页面或临时文件，这会把整站前后端一起替换。
 
-生产 UI 基线与校验值见 `ops/production-ui-baseline-20261012/README.md`。发布必须从该基线建立的干净隔离工作树构建，并先运行 `scripts/assert-production-release-safe.sh`。它会校验源码/资源未偏离锁定 UI、HEAD 来自生产基线、工作树干净，以及生产二进制哈希与操作者预期一致。只有用户明确授权 UI 改动，才可设置 `APPROVE_UI_CHANGE=YES`。
+生产 UI 基线与校验值见 `ops/production-ui-baseline-20261012/README.md`（清单于 2026-10-19 按线上当前运行版本刷新）。线上版本是本地、GitHub 与云服务器源码的共同 UI 基准；线上更新后须同步刷新清单。发布必须从干净隔离工作树构建，并先运行 `scripts/assert-production-release-safe.sh`。它校验 UI 源码和资源清单、HEAD 祖先锚点、工作树状态及线上二进制哈希。只有用户明确授权 UI 改动，才可设置 `APPROVE_UI_CHANGE=YES`。
 
 每次发布先制作并验证候选二进制，再原子替换；发布前备份生产二进制、配置、数据库和旧资源；新资源增量添加并保留旧哈希文件；发布后检查公网 `/health`、首页和涉及的前端资源。校验失败立即停止，回退到上一版二进制与资源。
 
