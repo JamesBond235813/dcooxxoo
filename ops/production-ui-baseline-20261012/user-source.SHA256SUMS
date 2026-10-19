@@ -270,7 +270,7 @@ d1eaa93ad98ebe687b8da36264192eae54d5ecdf4567c2c645acc66ecac63b90  ./src/utils/sm
 3a71f742cdb71b38727fb68c7829edf9ec450dbf41bd294b90f3176ba703853d  ./src/utils/telegramMiniApp.ts
 ed136e3569006af59d424894251f0167868554cc430c2a63c71b00f5fe8f5b00  ./src/utils/theme.ts
 f5a3c3edf15967acfde5dbc7bedd0582007290c2269536aa33b982b9e3abf4ff  ./src/views/About.vue
-e8acca6e0112e6945e54f2679b0e08c14cf25acb309dab7d89b70bdc85fa5039  ./src/views/AgentCenter.vue
+9f2e039927304eb01a146e0d0c47d34651785ca3f5aaa388a6a3bfd709a02cf2  ./src/views/AgentCenter.vue
 685d82a2e5eca18ade4f336838f17afd6ed4fe5aeaf772b7748424fae25ea589  ./src/views/Blog.vue
 4f9c080db726d4b71662ccfa2488498280be129e69c34a6d77285c8fe7f81055  ./src/views/BlogDetail.vue
 719029841d046fcebe6244b5199c5abafcd9236ae0bd8a01ecad74b95f553ae8  ./src/views/Cart.vue
