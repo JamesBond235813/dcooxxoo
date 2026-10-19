@@ -20,6 +20,7 @@ import (
 	"github.com/dujiao-next/internal/constants"
 	"github.com/dujiao-next/internal/logger"
 	settingsintegration "github.com/dujiao-next/internal/modules/settings/schema/integration"
+	"github.com/dujiao-next/internal/shared/jsonmap"
 	"github.com/dujiao-next/internal/shared/money"
 	"github.com/dujiao-next/internal/upstream"
 
@@ -140,7 +141,7 @@ func (s *Service) SyncProduct(mappingID uint) error {
 		// 同步本地 SKU 字段
 		localSKU, _ := s.skus.GetByID(skuMappings[i].LocalSKUID)
 		if localSKU != nil {
-			localSKU.SpecValuesJSON = upSKU.SpecValues
+			localSKU.SpecValuesJSON = preservePaymentRegions(localSKU.SpecValuesJSON, upSKU.SpecValues)
 			localSKU.IsActive = upSKU.IsActive
 			// 如果启用了自动同步价格，按加价比例更新本地售价和成本价
 			if conn.AutoSyncPrice {
@@ -686,7 +687,7 @@ func (s *Service) syncProductFromData(mapping *mappingdomain.Mapping, conn *site
 
 		localSKU, _ := s.skus.GetByID(skuMappings[i].LocalSKUID)
 		if localSKU != nil {
-			localSKU.SpecValuesJSON = upSKU.SpecValues
+			localSKU.SpecValuesJSON = preservePaymentRegions(localSKU.SpecValuesJSON, upSKU.SpecValues)
 			localSKU.IsActive = upSKU.IsActive
 			if conn.AutoSyncPrice {
 				newLocalPrice := CalculateLocalPrice(upPrice, conn.ExchangeRate, conn.PriceMarkupPercent, conn.PriceRoundingMode)
@@ -762,4 +763,39 @@ func (s *Service) syncProductFromData(mapping *mappingdomain.Mapping, conn *site
 	mapping.UpstreamStatus = mappingdomain.UpstreamStatusActive
 	mapping.LastSyncedAt = now
 	_ = s.mappings.Update(mapping)
+}
+
+// preservePaymentRegions retains the last known region snapshot when an
+// upstream catalog refresh omits it. Some suppliers publish region lists
+// separately from their plan registry, and a transient empty list must not
+// erase usable catalog metadata.
+func preservePaymentRegions(existing, incoming jsonmap.JSON) jsonmap.JSON {
+	if incoming == nil {
+		incoming = jsonmap.JSON{}
+	}
+	if !hasPaymentRegions(incoming["payment_regions"]) && hasPaymentRegions(existing["payment_regions"]) {
+		merged := make(jsonmap.JSON, len(existing)+len(incoming))
+		for key, value := range existing {
+			merged[key] = value
+		}
+		for key, value := range incoming {
+			merged[key] = value
+		}
+		merged["payment_regions"] = existing["payment_regions"]
+		return merged
+	}
+	return incoming
+}
+
+func hasPaymentRegions(value interface{}) bool {
+	switch regions := value.(type) {
+	case []string:
+		return len(regions) > 0
+	case []map[string]string:
+		return len(regions) > 0
+	case []interface{}:
+		return len(regions) > 0
+	default:
+		return false
+	}
 }
