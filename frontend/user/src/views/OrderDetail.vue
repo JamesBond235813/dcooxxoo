@@ -645,10 +645,10 @@ const preflightSession = async () => {
   try {
     const result = await userOrderAPI.preflightSession(order.value.order_no, sessionValue.value.trim())
     sessionAccountSummary.value = result.data?.data || null
-    if (!sessionAccountSummary.value) throw new Error('ZovoCard 未返回账号信息')
+    if (!sessionAccountSummary.value) throw new Error(t('accountPreflight.noAccount'))
     sessionReviewOpen.value = true
   } catch (error: any) {
-    toast.error(error?.message || 'ZovoCard 账号检查失败，请确认 Session 后重试')
+    toast.error(error?.message || t('accountPreflight.failed'))
   } finally {
     sessionPreflighting.value = false
   }

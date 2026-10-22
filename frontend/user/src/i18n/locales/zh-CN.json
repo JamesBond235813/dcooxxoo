@@ -1841,6 +1841,14 @@
     "member": "会员购买",
     "guest": "游客可购"
   },
+  "accountPreflight": {
+    "title": "账号检查结果",
+    "sourceNotice": "以上账号和套餐信息来自实时预检；确认账号正确后，系统才会继续充值。",
+    "checking": "正在检查账号…",
+    "checkButton": "检查账号信息",
+    "noAccount": "未返回账号信息",
+    "failed": "账号检查失败，请确认 Session 后重试"
+  },
   "plusHalf": {
     "checkButton": "检测 Plus 半价资格",
     "title": "Plus 半价资格检测",

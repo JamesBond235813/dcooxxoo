@@ -1841,6 +1841,14 @@
     "authSubmit": "保存並查詢",
     "authClear": "清除已保存資訊"
   },
+  "accountPreflight": {
+    "title": "帳號檢查結果",
+    "sourceNotice": "以上帳號和套餐資訊來自即時預檢；確認帳號正確後，系統才會繼續充值。",
+    "checking": "正在檢查帳號…",
+    "checkButton": "檢查帳號資訊",
+    "noAccount": "未返回帳號資訊",
+    "failed": "帳號檢查失敗，請確認 Session 後重試"
+  },
   "plusHalf": {
     "checkButton": "檢測 Plus 半價資格",
     "title": "Plus 半價資格檢測",

@@ -1,18 +1,21 @@
 <template>
   <div class="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 text-sm dark:border-emerald-900 dark:bg-emerald-950/20">
-    <div class="font-semibold text-foreground">ZovoCard 账号检查结果</div>
+    <div class="font-semibold text-foreground">{{ t('accountPreflight.title') }}</div>
     <div class="mt-3 grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
       <div v-for="row in rows" :key="row.label" class="flex items-start justify-between gap-3">
         <span class="shrink-0 text-muted-foreground">{{ row.label }}</span>
         <span class="text-right font-medium text-foreground break-words">{{ row.value || '上游未提供' }}</span>
       </div>
     </div>
-    <p class="mt-3 text-xs text-muted-foreground">以上账号和套餐信息来自 ZovoCard 实时预检；确认账号正确后，系统才会继续充值。</p>
+    <p class="mt-3 text-xs text-muted-foreground">{{ t('accountPreflight.sourceNotice') }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{ account: Record<string, any> }>()
 

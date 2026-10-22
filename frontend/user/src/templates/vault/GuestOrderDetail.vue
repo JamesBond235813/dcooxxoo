@@ -50,7 +50,7 @@
           </ol>
         </div>
         <textarea v-model="sessionValue" rows="5" autocomplete="off" spellcheck="false" class="mt-3 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground" placeholder="粘贴完整 Session JSON" :disabled="sessionSubmitting || sessionPreflighting" />
-        <Button class="mt-3 rounded-full" size="sm" :disabled="sessionSubmitting || sessionPreflighting || !sessionJSONValid" @click="preflightSession">{{ sessionPreflighting ? '正在向 ZovoCard 检查账号…' : '检查账号信息' }}</Button>
+        <Button class="mt-3 rounded-full" size="sm" :disabled="sessionSubmitting || sessionPreflighting || !sessionJSONValid" @click="preflightSession">{{ sessionPreflighting ? t('accountPreflight.checking') : t('accountPreflight.checkButton') }}</Button>
         <div v-if="sessionReviewOpen" class="mt-4 rounded-xl border bg-background p-4">
           <h3 class="font-semibold text-foreground">请确认充值账号</h3>
           <SessionAccountSummary v-if="sessionAccountSummary" :account="sessionAccountSummary" />
@@ -167,10 +167,10 @@ const preflightSession = async () => {
       session: sessionValue.value.trim(),
     })
     sessionAccountSummary.value = result.data?.data || null
-    if (!sessionAccountSummary.value) throw new Error('ZovoCard 未返回账号信息')
+    if (!sessionAccountSummary.value) throw new Error(t('accountPreflight.noAccount'))
     sessionReviewOpen.value = true
   } catch (error: any) {
-    toast.error(error?.message || 'ZovoCard 账号检查失败，请确认 Session 后重试')
+    toast.error(error?.message || t('accountPreflight.failed'))
   } finally {
     sessionPreflighting.value = false
   }

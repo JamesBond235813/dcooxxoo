@@ -1841,6 +1841,14 @@
     "authSubmit": "Save and search",
     "authClear": "Clear saved info"
   },
+  "accountPreflight": {
+    "title": "Account check result",
+    "sourceNotice": "This account and plan information comes from a live check. Confirm the account before we continue the recharge.",
+    "checking": "Checking account…",
+    "checkButton": "Check account",
+    "noAccount": "No account information was returned",
+    "failed": "Account check failed. Verify the Session and try again."
+  },
   "plusHalf": {
     "checkButton": "Check Plus promotion eligibility",
     "title": "Plus promotion eligibility",
