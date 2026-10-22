@@ -212,6 +212,15 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 		if reg.Key == "plus_half" {
 			paymentRegions = []zovoPaymentRegion{{Country: "PH", Currency: "PHP"}}
 		}
+		// Mapping sync recognizes JSON-shaped slices when deciding whether an
+		// incoming region snapshot is present. Avoid a typed slice here, which
+		// would leave an outdated local multi-region snapshot in place.
+		catalogRegions := make([]map[string]string, 0, len(paymentRegions))
+		for _, region := range paymentRegions {
+			catalogRegions = append(catalogRegions, map[string]string{
+				"country": region.Country, "currency": region.Currency,
+			})
+		}
 
 		priceUsd := fmt.Sprintf("%.2f", float64(reg.ServiceFeeUsdMinor)/100.0)
 		stockQuantity := 0
@@ -260,7 +269,7 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 					SpecValues: jsonmap.JSON{
 						"plan":                  reg.Key,
 						"name":                  reg.Name,
-						"payment_regions":       paymentRegions,
+						"payment_regions":       catalogRegions,
 						"service_fee_usd_minor": reg.ServiceFeeUsdMinor,
 					},
 					PriceAmount:   priceUsd,

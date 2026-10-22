@@ -125,8 +125,8 @@ func TestZovoCardAdapter_ListProducts_PlusHalfOnlyPhilippines(t *testing.T) {
 	if err != nil || len(result.Items) != 1 {
 		t.Fatalf("unexpected result: %#v, %v", result, err)
 	}
-	regions, ok := result.Items[0].SKUs[0].SpecValues["payment_regions"].([]zovoPaymentRegion)
-	if !ok || len(regions) != 1 || regions[0].Country != "PH" || regions[0].Currency != "PHP" {
+	regions, ok := result.Items[0].SKUs[0].SpecValues["payment_regions"].([]map[string]string)
+	if !ok || len(regions) != 1 || regions[0]["country"] != "PH" || regions[0]["currency"] != "PHP" {
 		t.Fatalf("half-price regions must be PH/PHP, got %#v", result.Items[0].SKUs[0].SpecValues["payment_regions"])
 	}
 }
