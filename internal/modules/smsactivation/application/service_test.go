@@ -69,6 +69,10 @@ func TestSmsActivationService_Lifecycle(t *testing.T) {
 	expires := time.Now().UTC().Add(15 * time.Minute).Format(time.RFC3339)
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		if strings.HasPrefix(r.URL.Path, "/guest/prices") {
+			_, _ = w.Write([]byte(`{"openai":{"vietnam":{"any":{"cost":0.2,"count":200,"rate":90,"rate24":90}}}}`))
+			return
+		}
 		if r.URL.Path == "/user/buy/activation/vietnam/any/openai" {
 			callCount++
 			if callCount == 1 {

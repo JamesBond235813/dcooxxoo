@@ -144,7 +144,33 @@ func TestZovoCardAdapter_CreateOrder_AutoRedeem(t *testing.T) {
 		case "/openapi/v1/gpt-direct/plans":
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"code": 0,
-				"data": map[string]interface{}{"registry": []map[string]interface{}{{"key": "plus", "name": "Plus", "purchasable": true, "service_fee_usd_minor": 15}}},
+				"data": map[string]interface{}{"registry": []map[string]interface{}{{"key": "plus", "name": "Plus", "purchasable": true, "service_fee_usd_minor": 15, "payment_regions": []string{"PH"}}}},
+			})
+		case "/openapi/v1/gpt-direct/preflight":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"code": 0,
+				"data": map[string]interface{}{
+					"quotes": map[string]interface{}{
+						"plus": map[string]interface{}{
+							"country":           "PH",
+							"currency":          "PHP",
+							"amountMinor":       100000,
+							"minorUnitExponent": 2,
+						},
+					},
+				},
+			})
+		case "/openapi/v1/fx/rates":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"code": 0,
+				"data": map[string]interface{}{
+					"rates": []map[string]interface{}{
+						{
+							"currency":     "PHP",
+							"usd_per_unit": 0.017,
+						},
+					},
+				},
 			})
 		case "/openapi/v1/gpt-direct/cdks":
 			var body map[string]interface{}

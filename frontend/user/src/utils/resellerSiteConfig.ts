@@ -1,4 +1,4 @@
-import { sanitizePublicText } from './publicText'
+import { sanitizePublicText } from './publicText.ts'
 
 export type ResellerLocale = 'zh-CN' | 'zh-TW' | 'en-US'
 export type LocalizedText = Record<ResellerLocale, string>
