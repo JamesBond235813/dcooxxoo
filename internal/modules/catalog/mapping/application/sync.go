@@ -799,38 +799,3 @@ func (s *Service) syncProductFromData(mapping *mappingdomain.Mapping, conn *site
 	mapping.LastSyncedAt = now
 	_ = s.mappings.Update(mapping)
 }
-
-// preservePaymentRegions retains the last known region snapshot when an
-// upstream catalog refresh omits it. Some suppliers publish region lists
-// separately from their plan registry, and a transient empty list must not
-// erase usable catalog metadata.
-func preservePaymentRegions(existing, incoming jsonmap.JSON) jsonmap.JSON {
-	if incoming == nil {
-		incoming = jsonmap.JSON{}
-	}
-	if !hasPaymentRegions(incoming["payment_regions"]) && hasPaymentRegions(existing["payment_regions"]) {
-		merged := make(jsonmap.JSON, len(existing)+len(incoming))
-		for key, value := range existing {
-			merged[key] = value
-		}
-		for key, value := range incoming {
-			merged[key] = value
-		}
-		merged["payment_regions"] = existing["payment_regions"]
-		return merged
-	}
-	return incoming
-}
-
-func hasPaymentRegions(value interface{}) bool {
-	switch regions := value.(type) {
-	case []string:
-		return len(regions) > 0
-	case []map[string]string:
-		return len(regions) > 0
-	case []interface{}:
-		return len(regions) > 0
-	default:
-		return false
-	}
-}
