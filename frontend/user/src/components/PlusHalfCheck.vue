@@ -1,35 +1,157 @@
 <template>
-  <div>
-    <button type="button" class="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700" @click="open = true">{{ t('plusHalf.checkButton') }}</button>
-    <div v-if="open" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" :aria-label="t('plusHalf.title')">
-      <div class="w-full max-w-lg rounded-2xl bg-background p-6 text-foreground shadow-xl">
-        <div class="flex items-start justify-between gap-4">
-          <h2 class="text-lg font-bold">{{ t('plusHalf.title') }}</h2>
-          <button type="button" :aria-label="t('plusHalf.close')" @click="close">×</button>
+  <div class="inline-block">
+    <button
+      type="button"
+      :class="[
+        'inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95 transition-all',
+        $attrs.class
+      ]"
+      @click="openModal"
+    >
+      <Sparkles class="h-4 w-4 text-emerald-200 animate-pulse shrink-0" />
+      <span>{{ t('plusHalf.checkButton') }}</span>
+    </button>
+
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition-opacity duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="open"
+          class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+        >
+          <!-- Backdrop with blur -->
+          <div class="fixed inset-0 bg-black/65 backdrop-blur-xs" aria-hidden="true" @click="close" />
+
+          <!-- Modal Card -->
+          <div
+            class="relative z-10 w-full max-w-lg rounded-2xl bg-card p-6 sm:p-7 text-card-foreground shadow-2xl border border-border/80 transition-all"
+            role="dialog"
+            aria-modal="true"
+            :aria-label="t('plusHalf.title')"
+          >
+            <!-- Header -->
+            <div class="flex items-start justify-between gap-4 pb-3 border-b border-border/50">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300">
+                  <Sparkles class="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 class="text-base sm:text-lg font-bold leading-tight text-foreground">{{ t('plusHalf.title') }}</h2>
+                  <p class="text-xs text-muted-foreground mt-0.5 leading-relaxed">{{ t('plusHalf.description') }}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground transition"
+                :aria-label="t('plusHalf.close')"
+                @click="close"
+              >
+                <X class="h-4 w-4" />
+              </button>
+            </div>
+
+            <!-- Body -->
+            <div class="mt-4 space-y-3">
+              <div class="flex items-center justify-between text-xs text-muted-foreground">
+                <span class="font-medium text-foreground">ChatGPT Session JSON</span>
+                <span class="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
+                  <ShieldCheck class="h-3.5 w-3.5" /> 官方实时预检 · 安全脱敏
+                </span>
+              </div>
+
+              <textarea
+                v-model="session"
+                rows="5"
+                autocomplete="off"
+                spellcheck="false"
+                class="w-full rounded-xl border border-input bg-background/50 p-3 text-xs sm:text-sm font-mono placeholder:text-muted-foreground/60 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition resize-none"
+                :placeholder="t('plusHalf.sessionPlaceholder')"
+                :disabled="loading"
+              />
+
+              <!-- Error Alert -->
+              <div v-if="error" class="flex items-start gap-2.5 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive" role="alert">
+                <AlertCircle class="h-4 w-4 shrink-0 mt-0.5" />
+                <div class="leading-relaxed">{{ error }}</div>
+              </div>
+
+              <!-- Ineligible Alert -->
+              <div v-if="checked && !eligible && !error" class="flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3.5 text-xs text-amber-700 dark:text-amber-300" role="status">
+                <AlertCircle class="h-4 w-4 shrink-0 mt-0.5" />
+                <div class="space-y-1 leading-relaxed">
+                  <div class="font-semibold">{{ t('plusHalf.notEligible') }}</div>
+                  <div class="text-[11px] opacity-85">该账号上游未授予或已使用过半价资格，您仍可正常选购常规 Plus 订阅服务。</div>
+                </div>
+              </div>
+
+              <!-- Eligible Card -->
+              <div v-if="eligible" class="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-xs sm:text-sm text-foreground space-y-2.5" role="status">
+                <div class="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold">
+                  <CheckCircle2 class="h-4 w-4 shrink-0" />
+                  <span class="truncate">{{ t('plusHalf.eligible', { email: accountEmail }) }}</span>
+                </div>
+                <div class="flex items-baseline justify-between pt-2 border-t border-emerald-500/20">
+                  <span class="text-xs text-muted-foreground">特惠专享价</span>
+                  <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">¥{{ price || '66.00' }} <span class="text-xs font-normal text-muted-foreground">/ 月</span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="mt-5 flex items-center justify-end gap-3 pt-3 border-t border-border/50">
+              <button
+                type="button"
+                class="rounded-xl border border-border px-4 py-2 text-sm font-medium hover:bg-accent transition"
+                @click="close"
+              >
+                {{ t('plusHalf.close') }}
+              </button>
+
+              <button
+                v-if="!eligible"
+                type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 transition active:scale-95"
+                :disabled="loading || !session.trim()"
+                @click="check"
+              >
+                <Loader2 v-if="loading" class="h-4 w-4 animate-spin" />
+                <span>{{ loading ? t('plusHalf.checking') : t('plusHalf.checkNow') }}</span>
+              </button>
+
+              <button
+                v-if="eligible"
+                type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-2 text-sm font-extrabold text-white shadow-md hover:bg-emerald-700 hover:shadow-lg disabled:opacity-50 transition active:scale-95"
+                :disabled="loading || !offer"
+                @click="buy"
+              >
+                <span>{{ t('plusHalf.buyNow') }} (¥{{ price || '66.00' }})</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <p class="mt-2 text-sm text-muted-foreground">{{ t('plusHalf.description') }}</p>
-        <textarea v-model="session" rows="6" autocomplete="off" spellcheck="false" class="mt-4 w-full rounded-lg border bg-background p-3 text-sm" :placeholder="t('plusHalf.sessionPlaceholder')" :disabled="loading" />
-        <p v-if="error" class="mt-3 text-sm text-destructive" role="alert">{{ error }}</p>
-        <p v-if="checked && !eligible" class="mt-3 text-sm text-amber-600" role="status">{{ t('plusHalf.notEligible') }}</p>
-        <div v-if="eligible" class="mt-3 rounded-lg border border-emerald-400/40 bg-emerald-500/10 p-3 text-sm" role="status">
-          <p>{{ t('plusHalf.eligible', { email: accountEmail }) }}</p>
-          <p v-if="price" class="mt-1 font-semibold">{{ t('plusHalf.price', { price }) }}</p>
-        </div>
-        <div class="mt-5 flex flex-wrap gap-3">
-          <button type="button" class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white disabled:opacity-50" :disabled="loading || !session.trim()" @click="check">{{ loading ? t('plusHalf.checking') : t('plusHalf.checkNow') }}</button>
-          <button v-if="eligible" type="button" class="rounded-lg border px-5 py-2 text-sm font-bold disabled:opacity-50" :disabled="loading || !offer" @click="buy">{{ t('plusHalf.buyNow') }}</button>
-        </div>
-      </div>
-    </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { Sparkles, X, Loader2, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-vue-next'
 import { guestOrderAPI, productAPI } from '../api'
 import { useBuyNowStore } from '../stores/buyNow'
+
+defineOptions({
+  inheritAttrs: false,
+})
 
 const { t } = useI18n()
 const router = useRouter()
@@ -45,11 +167,43 @@ const offer = ref<any>(null)
 const offerSku = ref<any>(null)
 const price = ref('')
 
-watch(session, () => { eligible.value = false; checked.value = false; offer.value = null; offerSku.value = null; price.value = '' })
+watch(session, () => {
+  eligible.value = false
+  checked.value = false
+  offer.value = null
+  offerSku.value = null
+  price.value = ''
+  error.value = ''
+})
 
-const close = () => { open.value = false; session.value = ''; error.value = ''; eligible.value = false }
+const openModal = () => {
+  open.value = true
+}
+
+const close = () => {
+  open.value = false
+  session.value = ''
+  error.value = ''
+  eligible.value = false
+  checked.value = false
+}
+
+const onKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && open.value) {
+    close()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+})
 
 const check = async () => {
+  if (!session.value.trim()) return
   loading.value = true
   error.value = ''
   eligible.value = false
