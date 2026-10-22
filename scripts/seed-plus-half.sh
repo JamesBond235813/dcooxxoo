@@ -111,6 +111,18 @@ AND NOT EXISTS (
   SELECT 1 FROM `sku_mappings` WHERE `local_sku_id` = ps.id
 );
 
+-- Existing installations may have received an earlier multi-region snapshot.
+-- Keep the customer copy and SKU metadata aligned with the PH-only workflow.
+UPDATE `products`
+SET `description_json` = '{"en-US":"Special promotion price for eligible ChatGPT accounts","zh-CN":"通过半价资格预检后下单，付款后自动提交充值","zh-TW":"通過半價資格預檢後下單，付款後自動提交儲值"}',
+    `manual_form_schema_json` = '{"fields":[{"key":"session","label":{"en-US":"ChatGPT Session","zh-CN":"ChatGPT Session","zh-TW":"ChatGPT Session"},"placeholder":{"en-US":"Submit the complete ChatGPT Session JSON before payment","zh-CN":"请在付款前提交完整的 ChatGPT Session JSON","zh-TW":"請在付款前提交完整的 ChatGPT Session JSON"},"required":true,"type":"textarea"}]}'
+WHERE `slug` = 'chatgpt-plus-half';
+
+UPDATE `product_skus`
+SET `spec_values_json` = '{"name":"ChatGPT Plus 半价","payment_regions":[{"country":"PH","currency":"PHP"}],"plan":"plus_half","service_fee_usd_minor":15}'
+WHERE `sku_code` = 'plus_half'
+  AND `product_id` IN (SELECT `id` FROM `products` WHERE `slug` = 'chatgpt-plus-half');
+
 COMMIT;
 SQL
 
