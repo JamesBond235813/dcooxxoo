@@ -393,7 +393,8 @@ func (a *ZovoCardAdapter) CheckPlusHalfEligibility(ctx context.Context, session 
 	}
 	defer resp.Body.Close()
 	var result struct {
-		Code int `json:"code"`
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
 		Data struct {
 			Email          string `json:"email"`
 			AccountEmail   string `json:"account_email"`
@@ -407,7 +408,11 @@ func (a *ZovoCardAdapter) CheckPlusHalfEligibility(ctx context.Context, session 
 		return false, "", fmt.Errorf("decode ZovoCard half-price preflight: %w", err)
 	}
 	if resp.StatusCode != http.StatusOK || result.Code != 0 {
-		return false, "", errors.New("ZovoCard half-price preflight rejected the account")
+		msg := strings.TrimSpace(result.Msg)
+		if msg == "" {
+			msg = "ZovoCard half-price preflight rejected the account"
+		}
+		return false, "", errors.New(msg)
 	}
 	email := strings.TrimSpace(result.Data.Email)
 	if email == "" {

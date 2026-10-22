@@ -371,6 +371,10 @@ func (a orderCreateAdapter) CreateGuestOrder(input ordertransport.CreateGuestOrd
 	return order, mapOrderTransportError(err)
 }
 
+func (a orderCreateAdapter) CheckPlusHalfEligibility(session string) (bool, string, uint, uint, error) {
+	return a.orders.CheckPlusHalfEligibility(session)
+}
+
 type orderGuestCreateCaptchaAdapter struct {
 	captcha *captchaapp.Service
 }

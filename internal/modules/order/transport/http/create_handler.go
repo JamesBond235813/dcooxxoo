@@ -103,11 +103,16 @@ func (h *CreateHandler) CheckPlusHalfEligibility(c *gin.Context) {
 		CheckPlusHalfEligibility(string) (bool, string, uint, uint, error)
 	})
 	if !ok {
-		ginutil.RespondError(c, response.CodeInternal, "error.session_submission_failed", nil)
+		ginutil.RespondError(c, response.CodeInternal, "error.session_submission_failed", errors.New("orders does not implement CheckPlusHalfEligibility"))
 		return
 	}
 	eligible, email, productID, skuID, err := checker.CheckPlusHalfEligibility(req.Session)
 	if err != nil {
+		errMsg := strings.TrimSpace(err.Error())
+		if errMsg != "" {
+			ginutil.RespondErrorWithMsg(c, response.CodeBadRequest, errMsg, err)
+			return
+		}
 		ginutil.RespondError(c, response.CodeBadRequest, "error.session_submission_failed", err)
 		return
 	}
