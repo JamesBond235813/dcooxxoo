@@ -109,6 +109,23 @@ func (s *OrderService) buildOrderResult(input orderCreateParams) (*orderBuildRes
 		if err != nil {
 			return nil, err
 		}
+		if sku.SKUCode == "plus_half" && !input.SkipManualFormCheck {
+			if item.Quantity != 1 {
+				return nil, ErrInvalidOrderItem
+			}
+			submission := resolveManualFormSubmission(manualFormData, product.ID, sku.ID)
+			session, _ := submission["session"].(string)
+			checker, ok := s.procurementTrigger.(interface {
+				CheckPlusHalfEligibilityForProduct(uint, string) (bool, string, error)
+			})
+			if !ok || strings.TrimSpace(session) == "" {
+				return nil, ErrSessionSubmissionInvalid
+			}
+			eligible, _, checkErr := checker.CheckPlusHalfEligibilityForProduct(product.ID, session)
+			if checkErr != nil || !eligible {
+				return nil, ErrSessionSubmissionInvalid
+			}
+		}
 
 		productCurrency := currency
 		basePrice := sku.PriceAmount.Decimal.Round(2)

@@ -270,15 +270,17 @@ func (s *Service) handleSubmitFailure(procOrder *procurementdomain.Order, connec
 // isRetryableErrorCode 判断上游错误码是否可重试
 func isRetryableErrorCode(code string) bool {
 	nonRetryable := map[string]bool{
-		"insufficient_balance": true,
-		"payment_failed":       true,
-		"product_unavailable":  true,
-		"sku_unavailable":      true,
-		"invalid_request":      true,
-		"unauthorized":         true,
-		"forbidden":            true,
-		"duplicate_order":      true,
-		"product_out_of_stock": true,
+		"half_price_ineligible":            true,
+		"half_price_redeem_pending_review": true,
+		"insufficient_balance":             true,
+		"payment_failed":                   true,
+		"product_unavailable":              true,
+		"sku_unavailable":                  true,
+		"invalid_request":                  true,
+		"unauthorized":                     true,
+		"forbidden":                        true,
+		"duplicate_order":                  true,
+		"product_out_of_stock":             true,
 	}
 	return !nonRetryable[strings.ToLower(strings.TrimSpace(code))]
 }

@@ -90,6 +90,30 @@ type CreateHandler struct {
 	pay      OrderPaymentCreator
 }
 
+// CheckPlusHalfEligibility is a rate-limited, read-only pre-payment check.
+func (h *CreateHandler) CheckPlusHalfEligibility(c *gin.Context) {
+	var req struct {
+		Session string `json:"session" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.Session) == "" || len(req.Session) > 1<<20 {
+		ginutil.RespondError(c, response.CodeBadRequest, "error.session_submission_failed", err)
+		return
+	}
+	checker, ok := h.orders.(interface {
+		CheckPlusHalfEligibility(string) (bool, string, uint, uint, error)
+	})
+	if !ok {
+		ginutil.RespondError(c, response.CodeInternal, "error.session_submission_failed", nil)
+		return
+	}
+	eligible, email, productID, skuID, err := checker.CheckPlusHalfEligibility(req.Session)
+	if err != nil {
+		ginutil.RespondError(c, response.CodeBadRequest, "error.session_submission_failed", err)
+		return
+	}
+	response.Success(c, gin.H{"eligible": eligible, "account_email": email, "product_id": productID, "sku_id": skuID})
+}
+
 func NewCreateHandler(orders OrderCreateService, payments PaymentChannelPolicy, captcha GuestCreateCaptcha, pay OrderPaymentCreator) *CreateHandler {
 	if orders == nil {
 		panic("order create handler: orders is nil")

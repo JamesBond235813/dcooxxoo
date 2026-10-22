@@ -52,6 +52,7 @@
           <p class="line-clamp-2 max-w-[52ch] text-sm leading-relaxed text-white/85 sm:text-base">{{ heroSubtitle }}</p>
 
           <div class="flex flex-wrap items-center gap-3 pt-1.5">
+            <PlusHalfCheck />
             <button
               type="button"
               class="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[color:var(--ink)] transition hover:scale-[1.03]"
@@ -80,6 +81,7 @@
 </template>
 
 <script setup lang="ts">
+import PlusHalfCheck from '../../../components/PlusHalfCheck.vue'
 import { onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ArrowRight, ChevronLeft, ChevronRight, Zap } from 'lucide-vue-next'

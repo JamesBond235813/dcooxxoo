@@ -21,6 +21,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
 const API_PREFIX = '/api/v1'
 
 interface RequestOptions {
+    timeoutMs?: number
     params?: Record<string, any>
     headers?: Record<string, string>
     skipAgentCode?: boolean
@@ -101,7 +102,7 @@ function createClient(injectAuth: boolean) {
         }
 
         const controller = new AbortController()
-        const timer = setTimeout(() => controller.abort(), timeout)
+        const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? timeout)
 
         let response: Response
         try {

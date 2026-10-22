@@ -525,6 +525,11 @@ export function useCheckout() {
       })
       payload[product.itemKey] = row
     })
+    const halfItem = cartItems.value.find(item => item.skuCode === 'plus_half')
+    if (isBuyNowMode.value && halfItem && buyNowStore.plusHalfSession) {
+      const key = String(halfItem.productId)
+      payload[key] = { ...(payload[key] || {}), session: buyNowStore.plusHalfSession }
+    }
     return payload
   }
 

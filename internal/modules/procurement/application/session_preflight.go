@@ -62,3 +62,32 @@ func (s *Service) PreflightSessionForOrder(orderID, productID, skuID uint, sessi
 	defer cancel()
 	return preflighter.PreflightSession(ctx, session)
 }
+
+// CheckPlusHalfEligibilityForProduct validates a credential before a customer
+// is allowed to create a Plus half-price order. No order or CDK is created.
+func (s *Service) CheckPlusHalfEligibilityForProduct(productID uint, session string) (bool, string, error) {
+	session = strings.TrimSpace(session)
+	if productID == 0 || session == "" || len(session) > 1<<20 {
+		return false, "", errors.New("invalid Plus half-price eligibility request")
+	}
+	connectionID, found, err := s.mappingRepo.FindConnectionID(productID)
+	if err != nil {
+		return false, "", err
+	}
+	if !found {
+		return false, "", errors.New("Plus half-price product has no upstream mapping")
+	}
+	connection, err := s.connections.Open(connectionID)
+	if err != nil {
+		return false, "", err
+	}
+	checker, ok := connection.(interface {
+		CheckPlusHalfEligibility(context.Context, string) (bool, string, error)
+	})
+	if !ok {
+		return false, "", errors.New("upstream does not support Plus half-price eligibility")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+	return checker.CheckPlusHalfEligibility(ctx, session)
+}

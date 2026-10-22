@@ -76,6 +76,11 @@ func (s *Service) ListPublic(categoryID, search string, page, pageSize int) ([]p
 		OnlyActive:   true,
 		WithCategory: true,
 	}
+	if offer, lookupErr := s.products.GetBySlug("chatgpt-plus-half", false); lookupErr != nil {
+		return nil, 0, lookupErr
+	} else if offer != nil {
+		filter.ExcludeProductIDs = []uint{offer.ID}
+	}
 	return s.products.List(filter)
 }
 
@@ -94,6 +99,11 @@ func (s *Service) ListPublicForTenant(tenant reseller.TenantContext, resellerRep
 	hiddenIDs, err := resellerRepo.ListHiddenProductIDs(*tenant.ResellerID)
 	if err != nil {
 		return nil, 0, err
+	}
+	if offer, lookupErr := s.products.GetBySlug("chatgpt-plus-half", false); lookupErr != nil {
+		return nil, 0, lookupErr
+	} else if offer != nil {
+		hiddenIDs = append(hiddenIDs, offer.ID)
 	}
 	filter := productcontract.ListFilter{
 		Page:              page,
@@ -129,6 +139,11 @@ func (s *Service) ListPublicExact(categoryID string, page, pageSize int) ([]prod
 		CategoryID:   categoryID,
 		OnlyActive:   true,
 		WithCategory: true,
+	}
+	if offer, lookupErr := s.products.GetBySlug("chatgpt-plus-half", false); lookupErr != nil {
+		return nil, 0, lookupErr
+	} else if offer != nil {
+		filter.ExcludeProductIDs = []uint{offer.ID}
 	}
 	return s.products.List(filter)
 }

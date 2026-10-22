@@ -76,6 +76,16 @@ func (s *session) PreflightSession(ctx context.Context, session string) (map[str
 	return preflighter.PreflightSession(ctx, session)
 }
 
+func (s *session) CheckPlusHalfEligibility(ctx context.Context, credential string) (bool, string, error) {
+	checker, ok := s.adapter.(interface {
+		CheckPlusHalfEligibility(context.Context, string) (bool, string, error)
+	})
+	if !ok {
+		return false, "", errors.New("upstream does not support Plus half-price eligibility")
+	}
+	return checker.CheckPlusHalfEligibility(ctx, credential)
+}
+
 func (s *session) GetOrder(ctx context.Context, orderID uint) (*procurementcontract.UpstreamOrder, error) {
 	detail, err := s.adapter.GetOrder(ctx, orderID)
 	if err != nil {

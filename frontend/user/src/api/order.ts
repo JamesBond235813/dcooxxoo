@@ -63,6 +63,7 @@ export const userOrderAPI = {
 }
 
 export const guestOrderAPI = {
+	checkPlusHalfEligibility: (session: string) => userApi.post('/guest/plus-half/eligibility', { session }, { timeoutMs: 35000 }),
 	resolveSmsReturn: (paymentID: string, ticket: string) =>
 		userApi.get(`/guest/payments/sms-return/${encodeURIComponent(paymentID)}/${encodeURIComponent(ticket)}`, { silentBusinessError: true }),
     preview: (data: any) => userApi.post('/guest/orders/preview', data),

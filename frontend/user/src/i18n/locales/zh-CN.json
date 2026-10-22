@@ -1840,5 +1840,20 @@
     "label": "购买身份",
     "member": "会员购买",
     "guest": "游客可购"
+  },
+  "plusHalf": {
+    "checkButton": "检测 Plus 半价资格",
+    "title": "Plus 半价资格检测",
+    "close": "关闭",
+    "description": "提交本人账号的完整 Session 进行免费预检。仅通过资格检测的账号可购买此套餐；半价是资格名称，售价以订单显示为准。",
+    "sessionPlaceholder": "粘贴完整的 ChatGPT Session JSON",
+    "checking": "检测中…",
+    "checkNow": "立即检测",
+    "notEligible": "当前未确认具备此资格，不能按该套餐下单。",
+    "eligible": "账号 {email} 已确认具备资格",
+    "price": "当前销售价：¥{price}",
+    "buyNow": "立即下单",
+    "unavailable": "半价套餐暂不可售，请稍后再试",
+    "checkFailed": "资格检测失败，请稍后重试"
   }
 }

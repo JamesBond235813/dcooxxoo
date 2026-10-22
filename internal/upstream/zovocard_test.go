@@ -106,6 +106,37 @@ func TestZovoCardAdapter_ListProducts(t *testing.T) {
 	}
 }
 
+func TestZovoCardAdapter_CheckPlusHalfEligibility(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		eligible interface{}
+		want     bool
+	}{
+		{name: "eligible", eligible: true, want: true},
+		{name: "ineligible", eligible: false},
+		{name: "unknown", eligible: nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				var request map[string]interface{}
+				if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+					t.Fatal(err)
+				}
+				if request["plan"] != "plus_half" || request["payment_country"] != "PH" || request["payment_currency"] != "PHP" {
+					t.Fatalf("wrong half-price preflight parameters: %#v", request)
+				}
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{"code": 0, "data": map[string]interface{}{"email": "buyer@example.com", "promotions": map[string]interface{}{"plus_half": map[string]interface{}{"eligible": tc.eligible}}}})
+			}))
+			defer ts.Close()
+			adapter := NewZovoCardAdapter(&siteconnectiondomain.Connection{BaseURL: ts.URL, ApiKey: "test-key"}, t.TempDir())
+			got, email, err := adapter.CheckPlusHalfEligibility(context.Background(), "session")
+			if err != nil || got != tc.want || email != "buyer@example.com" {
+				t.Fatalf("eligible=%v email=%q err=%v", got, email, err)
+			}
+		})
+	}
+}
+
 func TestZovoCardAdapter_CreateOrder_AutoRedeem(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -257,5 +288,45 @@ func TestZovoCardAdapter_CreateOrder_UnknownSKUFailsClosed(t *testing.T) {
 	}
 	if issueCalled {
 		t.Fatal("must not issue a CDK for an unknown SKU")
+	}
+}
+
+func TestZovoCardAdapter_CreateOrder_PlusHalfUsesPhilippines(t *testing.T) {
+	issued := 0
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/openapi/v1/gpt-direct/plans":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"code": 0, "data": map[string]interface{}{"registry": []map[string]interface{}{{"key": "plus_half", "purchasable": true}}}})
+		case "/openapi/v1/gpt-direct/preflight":
+			var body map[string]interface{}
+			_ = json.NewDecoder(r.Body).Decode(&body)
+			if body["plan"] != "plus_half" || body["payment_country"] != "PH" || body["payment_currency"] != "PHP" {
+				t.Errorf("wrong preflight routing: %#v", body)
+			}
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"code": 0, "data": map[string]interface{}{"email": "customer@example.com", "promotions": map[string]interface{}{"plus_half": map[string]interface{}{"eligible": true}}}})
+		case "/openapi/v1/gpt-direct/cdks":
+			issued++
+			var body map[string]interface{}
+			_ = json.NewDecoder(r.Body).Decode(&body)
+			if body["plan"] != "plus_half" || body["payment_country"] != "PH" || body["payment_currency"] != "PHP" {
+				t.Errorf("wrong issuance routing: %#v", body)
+			}
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"code": 0, "data": map[string]interface{}{"issued": []map[string]interface{}{{"id": 321, "code": "HALF-CDK", "fee_amount_minor": 15}}}})
+		case "/api/v1/cdk/preview":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"code": 0, "data": map[string]interface{}{"redemption_token": "preview"}})
+		case "/api/v1/cdk/preflight":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"code": 0, "data": map[string]interface{}{"preflight_token": "preflight"}})
+		case "/openapi/v1/gpt-direct/cdks/redeem":
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"code": 0, "data": map[string]interface{}{"order": map[string]interface{}{"order_id": 654, "status": "awaiting_card"}}})
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer ts.Close()
+	a := NewZovoCardAdapter(&siteconnectiondomain.Connection{BaseURL: ts.URL, ApiKey: "test-key"}, t.TempDir())
+	result, err := a.CreateOrder(context.Background(), CreateUpstreamOrderReq{SKUID: stablePlanID("plus_half"), Quantity: 1, DownstreamOrderNo: "HALF-TEST-1", ManualFormData: jsonmap.JSON{"session": "test-session"}})
+	if err != nil || result == nil || !result.OK || result.OrderID != 654 || issued != 1 {
+		t.Fatalf("half-price auto recharge failed: result=%+v err=%v issued=%d", result, err, issued)
 	}
 }

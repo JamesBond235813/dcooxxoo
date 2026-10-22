@@ -1840,5 +1840,20 @@
     "authInvalid": "Credentials mismatch, please try again",
     "authSubmit": "Save and search",
     "authClear": "Clear saved info"
+  },
+  "plusHalf": {
+    "checkButton": "Check Plus promotion eligibility",
+    "title": "Plus promotion eligibility",
+    "close": "Close",
+    "description": "Submit the complete Session for your own account for a free eligibility check. This plan is available only to eligible accounts; the order shows the selling price.",
+    "sessionPlaceholder": "Paste the complete ChatGPT Session JSON",
+    "checking": "Checking…",
+    "checkNow": "Check eligibility",
+    "notEligible": "Eligibility has not been confirmed, so this plan cannot be purchased.",
+    "eligible": "Account {email} is eligible",
+    "price": "Current price: ¥{price}",
+    "buyNow": "Order now",
+    "unavailable": "This plan is temporarily unavailable",
+    "checkFailed": "Eligibility check failed; please try again"
   }
 }

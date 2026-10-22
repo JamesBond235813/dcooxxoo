@@ -110,6 +110,7 @@ func RegisterGuestCreateRoute(guest gin.IRoutes, handler *CreateHandler) {
 		panic("order guest create route: required dependency is nil")
 	}
 	guest.POST("/orders", handler.CreateGuestOrder)
+	guest.POST("/plus-half/eligibility", handler.CheckPlusHalfEligibility)
 }
 
 // RegisterGuestCreateAndPayRoute 注册前台游客创建订单并发起支付路由。

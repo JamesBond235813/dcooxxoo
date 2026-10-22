@@ -151,6 +151,7 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 				Key                string   `json:"key"`
 				Name               string   `json:"name"`
 				Product            string   `json:"product"`
+				Enabled            *bool    `json:"enabled"`
 				ServiceFeeUsdMinor int64    `json:"service_fee_usd_minor"`
 				PaymentRegions     []string `json:"payment_regions"`
 			} `json:"plans"`
@@ -194,7 +195,9 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 	}
 
 	for _, reg := range plansResp.Data.Registry {
-		if !opts.IncludeInactive && !reg.Purchasable {
+		planConfig, hasPlanConfig := plansResp.Data.Plans[reg.Key]
+		active := reg.Purchasable && (!hasPlanConfig || planConfig.Enabled == nil || *planConfig.Enabled)
+		if !opts.IncludeInactive && !active {
 			continue
 		}
 		paymentRegions := plansResp.Data.PaymentRegions
@@ -209,7 +212,7 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 
 		priceUsd := fmt.Sprintf("%.2f", float64(reg.ServiceFeeUsdMinor)/100.0)
 		stockQuantity := 0
-		if reg.Purchasable {
+		if active {
 			// The registry reports whether issuance is enabled, not a numeric stock
 			// count. Treat it as on-demand/untracked stock instead of inventing 9999.
 			stockQuantity = -1
@@ -219,7 +222,10 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 
 		titleZH := "ChatGPT " + reg.Name
 		titleEN := "ChatGPT " + reg.Name
-		if reg.Key == "pro_50x" {
+		if reg.Key == "plus_half" {
+			titleZH = "ChatGPT Plus 半价资格套餐"
+			titleEN = "ChatGPT Plus Promotion Eligible Plan"
+		} else if reg.Key == "pro_50x" {
 			titleZH = "ChatGPT Pro (50x) 官方直充/CDK"
 			titleEN = "ChatGPT Pro (50x) Subscription / CDK"
 		} else if reg.Key == "pro_20x" {
@@ -243,7 +249,7 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 			// local fulfillment mode and would be misclassified as manual here.
 			FulfillmentType:  constants.FulfillmentTypeAuto,
 			ManualFormSchema: formSchema,
-			IsActive:         reg.Purchasable,
+			IsActive:         active,
 			SKUs: []UpstreamSKU{
 				{
 					ID:      skuID,
@@ -257,7 +263,7 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 					PriceAmount:   priceUsd,
 					StockStatus:   "in_stock",
 					StockQuantity: stockQuantity,
-					IsActive:      reg.Purchasable,
+					IsActive:      active,
 				},
 			},
 			UpdatedAt: time.Now(),
@@ -358,6 +364,60 @@ func (a *ZovoCardAdapter) PreflightSession(ctx context.Context, session string) 
 		return nil, errors.New("ZovoCard preflight did not return account email")
 	}
 	return result, nil
+}
+
+// CheckPlusHalfEligibility asks ZovoCard for the account-specific promotion.
+// A missing or indeterminate answer is never treated as eligible.
+func (a *ZovoCardAdapter) CheckPlusHalfEligibility(ctx context.Context, session string) (bool, string, error) {
+	session = strings.TrimSpace(session)
+	if session == "" {
+		return false, "", errors.New("session is required")
+	}
+	body, err := json.Marshal(map[string]interface{}{
+		"product": "gpt", "plan": "plus_half",
+		"credential":      map[string]string{"mode": "session", "session": session},
+		"payment_country": "PH", "payment_currency": "PHP",
+	})
+	if err != nil {
+		return false, "", err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, a.baseURL+"/openapi/v1/gpt-direct/preflight", bytes.NewReader(body))
+	if err != nil {
+		return false, "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-API-Key", a.apiKey)
+	resp, err := a.client.Do(req)
+	if err != nil {
+		return false, "", fmt.Errorf("ZovoCard half-price preflight: %w", err)
+	}
+	defer resp.Body.Close()
+	var result struct {
+		Code int `json:"code"`
+		Data struct {
+			Email          string `json:"email"`
+			AccountEmail   string `json:"account_email"`
+			BlockingReason string `json:"blocking_reason"`
+			Promotions     map[string]struct {
+				Eligible *bool `json:"eligible"`
+			} `json:"promotions"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(io.LimitReader(resp.Body, 2<<20)).Decode(&result); err != nil {
+		return false, "", fmt.Errorf("decode ZovoCard half-price preflight: %w", err)
+	}
+	if resp.StatusCode != http.StatusOK || result.Code != 0 {
+		return false, "", errors.New("ZovoCard half-price preflight rejected the account")
+	}
+	email := strings.TrimSpace(result.Data.Email)
+	if email == "" {
+		email = strings.TrimSpace(result.Data.AccountEmail)
+	}
+	if email == "" {
+		return false, "", errors.New("ZovoCard half-price preflight omitted account email")
+	}
+	promo, exists := result.Data.Promotions["plus_half"]
+	return exists && promo.Eligible != nil && *promo.Eligible && result.Data.BlockingReason == "", email, nil
 }
 
 func pickPublicFields(value interface{}, keys ...string) interface{} {
@@ -761,7 +821,19 @@ func (a *ZovoCardAdapter) CreateOrder(ctx context.Context, req CreateUpstreamOrd
 		idemKey = fmt.Sprintf("dj-direct-%d", time.Now().UnixNano())
 	}
 	paymentRegion := zovoPaymentRegion{}
-	if sessionToken != "" && planKey != "pro_20x_renew" && planKey != "pro_5x_renew" {
+	if planKey == "plus_half" {
+		if sessionToken == "" {
+			return nil, errors.New("Plus half-price purchase requires a verified session")
+		}
+		eligible, _, checkErr := a.CheckPlusHalfEligibility(ctx, sessionToken)
+		if checkErr != nil {
+			return nil, checkErr
+		}
+		if !eligible {
+			return &CreateUpstreamOrderResp{OK: false, ErrorCode: "HALF_PRICE_INELIGIBLE", ErrorMessage: "ChatGPT account is not confirmed eligible for Plus half-price"}, nil
+		}
+		paymentRegion = zovoPaymentRegion{Country: "PH", Currency: "PHP"}
+	} else if sessionToken != "" && planKey != "pro_20x_renew" && planKey != "pro_5x_renew" {
 		var selected bool
 		paymentRegion, selected, err = a.loadRegionSelection(idemKey)
 		if err != nil {
@@ -865,6 +937,10 @@ func (a *ZovoCardAdapter) CreateOrder(ctx context.Context, req CreateUpstreamOrd
 		// 自动执行兑换流程: Preview -> Preflight -> Redeem
 		redeemOrderID, err := a.executeAutoRedeem(ctx, cdkCode, sessionToken, req.DownstreamOrderNo)
 		if err != nil {
+			if planKey == "plus_half" {
+				logger.Warnw("half_price_redeem_requires_review", "order_no", req.DownstreamOrderNo, "error", err)
+				return &CreateUpstreamOrderResp{OK: false, ErrorCode: "HALF_PRICE_REDEEM_PENDING_REVIEW", ErrorMessage: "Plus half-price redemption requires reconciliation before retry"}, nil
+			}
 			logger.Warnw("auto_redeem_failed_fallback_to_cdk", "order_no", req.DownstreamOrderNo, "error", err)
 			// 自动兑换如果遇到鉴权/参数问题，以包含 CDK 凭证的方式交付给用户手工兑换
 			return &CreateUpstreamOrderResp{

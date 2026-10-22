@@ -4,6 +4,7 @@
     <!-- ==================== HERO SECTION ==================== -->
     <section class="relative z-10 pt-20 pb-3 md:pt-24 md:pb-8">
       <div class="max-w-6xl mx-auto px-4">
+        <div class="mb-3 flex justify-end"><PlusHalfCheck /></div>
         <div class="relative isolate min-h-[150px] overflow-hidden rounded-[1.35rem] border border-emerald-200/70 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.96),_transparent_58%),linear-gradient(135deg,#f0f8f2_0%,#e8f2ed_56%,#edf5f8_100%)] px-4 py-4 shadow-[0_10px_28px_-22px_rgba(16,85,65,0.45)] dark:border-emerald-900/50 dark:bg-[linear-gradient(135deg,#14251d,#182a26_58%,#17242b)] md:hidden">
           <div class="absolute -right-8 -top-10 -z-10 h-32 w-32 rounded-full bg-emerald-200/30 blur-2xl dark:bg-emerald-500/10"></div>
           <div class="flex items-center justify-between gap-3">
@@ -734,6 +735,7 @@
 </template>
 
 <script setup lang="ts">
+import PlusHalfCheck from '../components/PlusHalfCheck.vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'

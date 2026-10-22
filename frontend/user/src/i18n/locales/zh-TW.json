@@ -1840,5 +1840,20 @@
     "authInvalid": "資訊不匹配，請重新輸入",
     "authSubmit": "保存並查詢",
     "authClear": "清除已保存資訊"
+  },
+  "plusHalf": {
+    "checkButton": "檢測 Plus 半價資格",
+    "title": "Plus 半價資格檢測",
+    "close": "關閉",
+    "description": "提交本人帳號的完整 Session 進行免費預檢。只有通過資格檢測的帳號可購買此方案；半價是資格名稱，售價以訂單顯示為準。",
+    "sessionPlaceholder": "貼上完整的 ChatGPT Session JSON",
+    "checking": "檢測中…",
+    "checkNow": "立即檢測",
+    "notEligible": "目前未確認具備此資格，無法按此方案下單。",
+    "eligible": "帳號 {email} 已確認具備資格",
+    "price": "目前售價：¥{price}",
+    "buyNow": "立即下單",
+    "unavailable": "半價方案暫不可售，請稍後再試",
+    "checkFailed": "資格檢測失敗，請稍後重試"
   }
 }

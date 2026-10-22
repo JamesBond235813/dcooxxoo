@@ -32,6 +32,27 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// CheckPlusHalfEligibility validates the designated offer before payment.
+// The returned account email is informational; checkout still rechecks eligibility.
+func (s *OrderService) CheckPlusHalfEligibility(session string) (bool, string, uint, uint, error) {
+	product, err := s.productRepo.GetBySlug("chatgpt-plus-half", true)
+	if err != nil || product == nil {
+		return false, "", 0, 0, ErrProductNotAvailable
+	}
+	sku, err := s.productSKURepo.GetByProductAndCode(product.ID, "plus_half")
+	if err != nil || sku == nil || !sku.IsActive {
+		return false, "", 0, 0, ErrProductNotAvailable
+	}
+	checker, ok := s.procurementTrigger.(interface {
+		CheckPlusHalfEligibilityForProduct(uint, string) (bool, string, error)
+	})
+	if !ok {
+		return false, "", 0, 0, ErrQueueUnavailable
+	}
+	eligible, email, err := checker.CheckPlusHalfEligibilityForProduct(product.ID, session)
+	return eligible, email, product.ID, sku.ID, err
+}
+
 // OrderService 订单服务
 type OrderService struct {
 	orderStore              ordercontract.Store
