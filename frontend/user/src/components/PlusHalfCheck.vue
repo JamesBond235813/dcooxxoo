@@ -3,12 +3,12 @@
     <button
       type="button"
       :class="[
-        'inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95 transition-all',
+        'breath-btn inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-emerald-600 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-white hover:bg-emerald-700 active:scale-95 transition-all cursor-pointer select-none',
         $attrs.class
       ]"
       @click="openModal"
     >
-      <Sparkles class="h-4 w-4 text-emerald-200 animate-pulse shrink-0" />
+      <Sparkles class="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-200 animate-pulse shrink-0" />
       <span>{{ t('plusHalf.checkButton') }}</span>
     </button>
 
@@ -86,7 +86,7 @@
                 <AlertCircle class="h-4 w-4 shrink-0 mt-0.5" />
                 <div class="space-y-1 leading-relaxed">
                   <div class="font-semibold">{{ t('plusHalf.notEligible') }}</div>
-                  <div class="text-[11px] opacity-85">该账号上游未授予或已使用过半价资格，您仍可正常选购常规 Plus 订阅服务。</div>
+                  <div class="text-[11px] opacity-85">{{ t('plusHalf.notEligibleDesc') }}</div>
                 </div>
               </div>
 
@@ -249,3 +249,20 @@ const buy = () => {
   void router.push({ path: '/checkout', query: { mode: 'buynow' } })
 }
 </script>
+
+<style scoped>
+@keyframes breath {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55), 0 2px 5px 0 rgba(0, 0, 0, 0.12);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0), 0 4px 14px 0 rgba(16, 185, 129, 0.35);
+    transform: scale(1.025);
+  }
+}
+
+.breath-btn {
+  animation: breath 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+</style>

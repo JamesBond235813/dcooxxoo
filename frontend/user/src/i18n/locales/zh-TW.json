@@ -1858,6 +1858,7 @@
     "checking": "檢測中…",
     "checkNow": "立即檢測",
     "notEligible": "目前未確認具備此資格，無法按此方案下單。",
+    "notEligibleDesc": "該帳號依照OpenAI規則未授予或已使用過半價資格，您仍可正常選購常規 Plus 訂閱服務。",
     "eligible": "帳號 {email} 已確認具備資格",
     "price": "目前售價：¥{price}",
     "buyNow": "立即下單",

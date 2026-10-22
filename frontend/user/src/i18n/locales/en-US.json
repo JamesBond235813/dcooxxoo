@@ -1858,6 +1858,7 @@
     "checking": "Checking…",
     "checkNow": "Check eligibility",
     "notEligible": "Eligibility has not been confirmed, so this plan cannot be purchased.",
+    "notEligibleDesc": "This account is not eligible for or has already used the half-price qualification according to OpenAI rules. You can still purchase regular Plus subscriptions.",
     "eligible": "Account {email} is eligible",
     "price": "Current price: ¥{price}",
     "buyNow": "Order now",

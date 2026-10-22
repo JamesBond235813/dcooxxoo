@@ -10,19 +10,15 @@
             <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-white/75 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-emerald-800 shadow-xs dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>{{ t('homeMobile.heroTag') }}</span>
             <span class="text-right text-[10px] font-semibold tracking-wide text-emerald-800 dark:text-emerald-300">新时代水电煤<br class="hidden max-[370px]:block" /> 有它就有超能力</span>
           </div>
-          <div class="mt-4 flex items-end justify-between gap-3">
-            <div class="min-w-0">
-              <h1 class="text-[22px] font-extrabold tracking-[-0.035em] text-slate-900 dark:text-white">GPT 源头代充</h1>
-              <p class="mt-1 text-xs font-medium tracking-wide text-slate-600 dark:text-slate-300">{{ t('homeMobile.heroSubtitle') }}</p>
+          <div class="mt-3.5 flex items-center justify-between gap-2.5">
+            <div class="min-w-0 flex-1">
+              <h1 class="text-[20px] font-extrabold tracking-[-0.035em] text-slate-900 dark:text-white">GPT 源头代充</h1>
+              <p class="mt-0.5 text-xs font-medium tracking-wide text-slate-600 dark:text-slate-300">{{ t('homeMobile.heroSubtitle') }}</p>
             </div>
-            <div class="flex shrink-0 items-center gap-3 pb-0.5" aria-label="OpenAI 与 Claude">
-              <img src="/openai.svg" alt="OpenAI" class="h-8 w-8 object-contain dark:invert" />
-              <span class="h-7 w-px bg-slate-300/80 dark:bg-slate-600"></span>
-              <img src="/claude.svg" alt="Claude（即将推出）" class="h-8 w-8 object-contain grayscale opacity-45" />
+            <div class="flex shrink-0 items-center gap-2">
+              <img src="/openai.svg" alt="OpenAI" class="h-7 w-7 object-contain dark:invert" />
+              <PlusHalfCheck />
             </div>
-          </div>
-          <div class="mt-3.5 pt-2.5 border-t border-emerald-200/60 dark:border-emerald-800/40 flex justify-center">
-            <PlusHalfCheck class="w-full justify-center" />
           </div>
         </div>
         <div class="relative hidden overflow-hidden rounded-3xl border border-emerald-200/60 dark:border-emerald-900/40 bg-[#ecf3ec] dark:bg-[#15231c] p-5 sm:p-6 md:block md:p-7 shadow-sm">
