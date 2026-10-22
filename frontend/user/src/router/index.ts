@@ -116,6 +116,11 @@ const router = createRouter({
             component: templateView('Home', homeViewLoader),
         },
         {
+            path: '/plus-half',
+            name: 'plus-half-promo',
+            component: () => import('../views/PlusHalfPromo.vue'),
+        },
+        {
             path: '/color-demo',
             name: 'color-demo',
             component: colorDemoLoader,

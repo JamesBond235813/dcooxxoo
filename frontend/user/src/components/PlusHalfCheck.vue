@@ -23,14 +23,17 @@
       >
         <div
           v-if="open"
-          class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          class="fixed inset-0 z-[9999] flex items-start sm:items-center justify-center p-3 sm:p-6 overflow-y-auto pt-5 sm:pt-6 pb-20 sm:pb-6"
         >
           <!-- Backdrop with blur -->
           <div class="fixed inset-0 bg-black/65 backdrop-blur-xs" aria-hidden="true" @click="close" />
 
           <!-- Modal Card -->
           <div
-            class="relative z-10 w-full max-w-lg rounded-2xl bg-card p-6 sm:p-7 text-card-foreground shadow-2xl border border-border/80 transition-all"
+            :class="[
+              'relative z-10 w-full max-w-lg rounded-2xl bg-card p-5 sm:p-7 text-card-foreground shadow-2xl border border-border/80 transition-transform duration-200',
+              isKeyboardActive ? '-translate-y-3 sm:translate-y-0' : ''
+            ]"
             role="dialog"
             aria-modal="true"
             :aria-label="t('plusHalf.title')"
@@ -67,13 +70,39 @@
 
               <textarea
                 v-model="session"
-                rows="5"
+                rows="4"
                 autocomplete="off"
                 spellcheck="false"
                 class="w-full rounded-xl border border-input bg-background/50 p-3 text-xs sm:text-sm font-mono placeholder:text-muted-foreground/60 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none transition resize-none"
                 :placeholder="t('plusHalf.sessionPlaceholder')"
                 :disabled="loading"
+                @focus="isKeyboardActive = true"
+                @blur="isKeyboardActive = false"
               />
+
+              <!-- Session Tutorial Guide -->
+              <div class="rounded-xl border border-emerald-500/25 bg-emerald-500/5 dark:bg-emerald-950/20 p-3 text-xs space-y-1.5">
+                <div class="flex items-center justify-between font-semibold text-foreground">
+                  <span class="inline-flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
+                    <HelpCircle class="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                    如何获取 ChatGPT Session？
+                  </span>
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-900/40 hover:bg-emerald-200/60 transition cursor-pointer"
+                    @click="copySessionUrl"
+                  >
+                    <Check v-if="copied" class="h-3 w-3 text-emerald-600" />
+                    <Copy v-else class="h-3 w-3" />
+                    <span>{{ copied ? '已复制网址' : '复制 Session 网址' }}</span>
+                  </button>
+                </div>
+                <ol class="list-decimal list-inside space-y-1 text-muted-foreground text-[11px] leading-relaxed">
+                  <li>浏览器登录官方 <span class="font-mono text-foreground font-medium">chatgpt.com</span></li>
+                  <li>同一浏览器打开 <span class="font-mono text-emerald-700 dark:text-emerald-300 font-medium">chatgpt.com/api/auth/session</span></li>
+                  <li>全选页面内容并复制，粘贴到上方输入框即可</li>
+                </ol>
+              </div>
 
               <!-- Error Alert -->
               <div v-if="error" class="flex items-start gap-2.5 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive" role="alert">
@@ -145,7 +174,7 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { Sparkles, X, Loader2, CheckCircle2, AlertCircle, ShieldCheck } from 'lucide-vue-next'
+import { Sparkles, X, Loader2, CheckCircle2, AlertCircle, ShieldCheck, HelpCircle, Copy, Check } from 'lucide-vue-next'
 import { guestOrderAPI, productAPI } from '../api'
 import { useBuyNowStore } from '../stores/buyNow'
 
@@ -163,6 +192,26 @@ const error = ref('')
 const checked = ref(false)
 const eligible = ref(false)
 const accountEmail = ref('')
+const isKeyboardActive = ref(false)
+const copied = ref(false)
+
+const copySessionUrl = async () => {
+  try {
+    await navigator.clipboard.writeText('https://chatgpt.com/api/auth/session')
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch {
+    // fallback
+    const input = document.createElement('input')
+    input.value = 'https://chatgpt.com/api/auth/session'
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    document.body.removeChild(input)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  }
+}
 const offer = ref<any>(null)
 const offerSku = ref<any>(null)
 const price = ref('')

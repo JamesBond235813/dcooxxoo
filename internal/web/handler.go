@@ -180,6 +180,16 @@ func RegisterUser(r *gin.Engine, fsys fs.FS) error {
 		return fmt.Errorf("read user/index.html: %w", err)
 	}
 
+	plusHalfIndexCached := bytes.Replace(indexCached,
+		[]byte("<title>GPT订阅源头代充｜用户自己的账号，官方直充</title>"),
+		[]byte("<title>ChatGPT Plus 官方半价资格预检 | 现仅需 ¥66/月</title>"), 1)
+	plusHalfIndexCached = bytes.Replace(plusHalfIndexCached,
+		[]byte(`content="GPT订阅源头代充｜用户自己的账号，官方直充"`),
+		[]byte(`content="🔥 ChatGPT Plus 官方半价资格预检 | 现仅需 ¥66/月"`), -1)
+	plusHalfIndexCached = bytes.Replace(plusHalfIndexCached,
+		[]byte(`content="可信赖的源头代充服务，用户使用自己的账号完成官方订阅。代理轻松开启副业，拓展稳定现金流。"`),
+		[]byte(`content="提交本人 ChatGPT Session 即可免费预检半价资格，符合条件享专属 ¥66.00 官方直充！一号一卡，质保无忧。"`), -1)
+
 	fileServer := http.FileServer(http.FS(fsys))
 
 	r.NoRoute(func(c *gin.Context) {
@@ -192,6 +202,10 @@ func RegisterUser(r *gin.Engine, fsys fs.FS) error {
 		}
 
 		fp := strings.TrimPrefix(c.Request.URL.Path, "/")
+		if fp == "plus-half" || fp == "plus-half/" {
+			serveIndex(c, plusHalfIndexCached)
+			return
+		}
 		if fp == "" || fp == "index.html" {
 			serveIndex(c, indexCached)
 			return
