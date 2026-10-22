@@ -29,12 +29,10 @@
               ChatGPT Plus 官方半价资格预检
             </h1>
             <p class="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-xl">
-              OpenAI 会对符合条件的账号发放半价促销资格。提交您个人账号的 Session 即可免费进行实时预检，通过即可享受专属半价直充！
+              提交您个人账号的 Session 进行免费预检。只有检测结果显示具备资格，才可以按当前结账价格下单。
             </p>
             <div class="flex flex-wrap items-baseline gap-3 pt-2">
-              <span class="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400">¥66.00 <span class="text-sm font-normal text-muted-foreground">/ 月</span></span>
-              <span class="text-sm text-muted-foreground line-through">官方原价 ¥168</span>
-              <span class="rounded-full bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 shadow-xs">立省 ¥102</span>
+              <span class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">{{ eligible ? `¥${price} / 月` : '预检通过后显示价格' }}</span>
             </div>
           </div>
 
@@ -54,7 +52,7 @@
             </div>
             <div>
               <h2 class="text-lg font-bold text-foreground">在线资格检测工作台</h2>
-              <p class="text-xs text-muted-foreground mt-0.5">官方实时接口返回，检测结果 100% 真实有效</p>
+              <p class="text-xs text-muted-foreground mt-0.5">以实时接口返回的资格结果为准</p>
             </div>
           </div>
           <span class="inline-flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
@@ -168,10 +166,10 @@
             <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600">
               <ShieldCheck class="h-5 w-5" />
             </div>
-            <span>官方正规直充 · 绝无封号风险</span>
+            <span>个人账号直充</span>
           </div>
           <p class="text-xs text-muted-foreground leading-relaxed">
-            走正规海外 Visa/MasterCard 银行卡直充，非共享账号，独立开通，稳定享有 30 天质保。
+            使用您自己的 ChatGPT 账号提交预检；实际开通结果以订单履约状态为准。
           </p>
         </div>
 
@@ -183,7 +181,7 @@
             <span>解锁全部旗舰大模型</span>
           </div>
           <p class="text-xs text-muted-foreground leading-relaxed">
-            畅享 GPT-4o 顶阶推理、OpenAI o1 深度思考模型、高级实时语音、DALL·E 3 作图及 Canvas 交互。
+            订阅权益以 ChatGPT 官方当前套餐说明和您账号所在地区为准。
           </p>
         </div>
 
@@ -195,7 +193,7 @@
             <span>秒级自动化充值履约</span>
           </div>
           <p class="text-xs text-muted-foreground leading-relaxed">
-            支付成功后，系统即刻通过官方 API 触发代充升级，全流程自动化处理，最快几十秒即刻生效。
+            支付成功后系统自动提交充值请求；请在订单页面查看实时处理结果。
           </p>
         </div>
 
@@ -207,7 +205,7 @@
             <span>隐私保护 · 安全脱敏</span>
           </div>
           <p class="text-xs text-muted-foreground leading-relaxed">
-            Session 凭证仅在履约时用于调用官方充值通道，全程密文存储脱敏传输，绝不留存或泄露任何用户对话。
+            Session 用于资格预检与订单履约。请勿提交账号密码，并在订单完成后妥善保护您的登录状态。
           </p>
         </div>
       </div>
@@ -221,7 +219,7 @@
         <div class="divide-y divide-border/50 text-xs sm:text-sm space-y-3">
           <div class="pt-3 space-y-1">
             <p class="font-bold text-foreground">Q: 什么是 Plus 半价资格？</p>
-            <p class="text-muted-foreground leading-relaxed">A: OpenAI 会依据用户活跃度、注册地区等因素随机发放半价促销资格。拥有该资格的用户可以用专属优惠价完成订阅。本页面通过官方预检接口判断您的账号是否命中该特权。</p>
+            <p class="text-muted-foreground leading-relaxed">A: 是否具备资格由实时预检结果决定；“半价”是资格名称，结账金额以当前页面和订单为准。</p>
           </div>
           <div class="pt-3 space-y-1">
             <p class="font-bold text-foreground">Q: 检测未通过怎么办？</p>
@@ -229,7 +227,7 @@
           </div>
           <div class="pt-3 space-y-1">
             <p class="font-bold text-foreground">Q: 充值后支持退款吗？</p>
-            <p class="text-muted-foreground leading-relaxed">A: 订单支付后系统将实时对接 OpenAI 官方进行扣费开通。因虚拟订阅资产开通后即时消耗，官方直充成功后不支持无故退款；若因不可抗力导致充值未成功，将全额退还您的支付款项。</p>
+            <p class="text-muted-foreground leading-relaxed">A: 订单处理与退款规则请以商城服务条款和订单页面的实际状态为准；出现异常请联系客服处理。</p>
           </div>
         </div>
       </div>

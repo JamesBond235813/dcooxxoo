@@ -4,21 +4,28 @@
     <!-- ==================== HERO SECTION ==================== -->
     <section class="relative z-10 pt-20 pb-3 md:pt-24 md:pb-8">
       <div class="max-w-6xl mx-auto px-4">
-        <div class="relative isolate min-h-[150px] overflow-hidden rounded-[1.35rem] border border-emerald-200/70 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.96),_transparent_58%),linear-gradient(135deg,#f0f8f2_0%,#e8f2ed_56%,#edf5f8_100%)] px-4 py-4 shadow-[0_10px_28px_-22px_rgba(16,85,65,0.45)] dark:border-emerald-900/50 dark:bg-[linear-gradient(135deg,#14251d,#182a26_58%,#17242b)] md:hidden">
+        <div class="relative isolate overflow-hidden rounded-[1.35rem] border border-emerald-200/70 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.96),_transparent_58%),linear-gradient(135deg,#f0f8f2_0%,#e8f2ed_56%,#edf5f8_100%)] px-4 py-4 shadow-[0_10px_28px_-22px_rgba(16,85,65,0.45)] dark:border-emerald-900/50 dark:bg-[linear-gradient(135deg,#14251d,#182a26_58%,#17242b)] md:hidden">
           <div class="absolute -right-8 -top-10 -z-10 h-32 w-32 rounded-full bg-emerald-200/30 blur-2xl dark:bg-emerald-500/10"></div>
           <div class="flex items-center justify-between gap-3">
             <span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-white/75 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-emerald-800 shadow-xs dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>{{ t('homeMobile.heroTag') }}</span>
-            <span class="text-right text-[10px] font-semibold tracking-wide text-emerald-800 dark:text-emerald-300">新时代水电煤<br class="hidden max-[370px]:block" /> 有它就有超能力</span>
+            <span class="max-w-[46%] text-right text-[10px] font-semibold leading-tight tracking-wide text-emerald-800 dark:text-emerald-300">{{ t('homeMobile.heroSuperpower') }}</span>
           </div>
           <div class="mt-3.5 flex items-center justify-between gap-2.5">
             <div class="min-w-0 flex-1">
               <h1 class="text-[20px] font-extrabold tracking-[-0.035em] text-slate-900 dark:text-white">GPT 源头代充</h1>
               <p class="mt-0.5 text-xs font-medium tracking-wide text-slate-600 dark:text-slate-300">{{ t('homeMobile.heroSubtitle') }}</p>
             </div>
-            <div class="flex shrink-0 items-center gap-2">
-              <img src="/openai.svg" alt="OpenAI" class="h-7 w-7 object-contain dark:invert" />
-              <PlusHalfCheck />
+            <img src="/openai.svg" alt="OpenAI" class="h-9 w-9 shrink-0 object-contain dark:invert" />
+          </div>
+          <div class="mt-4 rounded-2xl border border-white/80 bg-white/75 p-3 shadow-[0_8px_22px_-16px_rgba(16,85,65,0.55)] dark:border-emerald-800/60 dark:bg-emerald-950/45">
+            <div class="flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="text-[13px] font-bold text-slate-900 dark:text-white">{{ t('homeMobile.halfCheckTitle') }}</p>
+                <p class="mt-0.5 text-[11px] leading-snug text-slate-600 dark:text-slate-300">{{ t('homeMobile.halfCheckHint') }}</p>
+              </div>
+              <span class="shrink-0 rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">{{ t('homeMobile.halfCheckBadge') }}</span>
             </div>
+            <PlusHalfCheck class="mt-3 min-h-10 w-full justify-center" />
           </div>
         </div>
         <div class="relative hidden overflow-hidden rounded-3xl border border-emerald-200/60 dark:border-emerald-900/40 bg-[#ecf3ec] dark:bg-[#15231c] p-5 sm:p-6 md:block md:p-7 shadow-sm">

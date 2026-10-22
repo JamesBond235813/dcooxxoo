@@ -1,5 +1,5 @@
 <template>
-  <div class="inline-block">
+  <div class="inline-block max-md:block max-md:w-full">
     <button
       type="button"
       :class="[

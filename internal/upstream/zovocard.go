@@ -209,6 +209,9 @@ func (a *ZovoCardAdapter) ListProducts(ctx context.Context, opts ListProductsOpt
 				paymentRegions = append(paymentRegions, zovoPaymentRegion{Country: country, Currency: currency})
 			}
 		}
+		if reg.Key == "plus_half" {
+			paymentRegions = []zovoPaymentRegion{{Country: "PH", Currency: "PHP"}}
+		}
 
 		priceUsd := fmt.Sprintf("%.2f", float64(reg.ServiceFeeUsdMinor)/100.0)
 		stockQuantity := 0

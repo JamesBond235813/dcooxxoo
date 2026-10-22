@@ -106,6 +106,31 @@ func TestZovoCardAdapter_ListProducts(t *testing.T) {
 	}
 }
 
+func TestZovoCardAdapter_ListProducts_PlusHalfOnlyPhilippines(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]interface{}{
+			"code": 0,
+			"data": map[string]interface{}{
+				"payment_regions": []map[string]string{{"country": "US", "currency": "USD"}},
+				"registry": []map[string]interface{}{{
+					"key": "plus_half", "name": "Plus Half", "purchasable": true,
+					"payment_regions": []string{"US", "JP"},
+				}},
+			},
+		})
+	}))
+	defer ts.Close()
+	adapter := NewZovoCardAdapter(&siteconnectiondomain.Connection{BaseURL: ts.URL, ApiKey: "test-key"}, t.TempDir())
+	result, err := adapter.ListProducts(context.Background(), ListProductsOpts{})
+	if err != nil || len(result.Items) != 1 {
+		t.Fatalf("unexpected result: %#v, %v", result, err)
+	}
+	regions, ok := result.Items[0].SKUs[0].SpecValues["payment_regions"].([]zovoPaymentRegion)
+	if !ok || len(regions) != 1 || regions[0].Country != "PH" || regions[0].Currency != "PHP" {
+		t.Fatalf("half-price regions must be PH/PHP, got %#v", result.Items[0].SKUs[0].SpecValues["payment_regions"])
+	}
+}
+
 func TestZovoCardAdapter_CheckPlusHalfEligibility(t *testing.T) {
 	for _, tc := range []struct {
 		name     string
