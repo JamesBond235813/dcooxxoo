@@ -920,9 +920,22 @@
       v-if="quickBuyProduct"
       :product="quickBuyProduct"
       :visible="quickBuyVisible"
+      :plus-half-session="wholesaleHalfSession"
       agent-mode
       @update:visible="quickBuyVisible = $event"
     />
+    <div v-if="wholesaleHalfOpen" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-label="代理拿货半价资格预检">
+      <div class="w-full max-w-lg space-y-4 rounded-2xl bg-card p-5 shadow-xl">
+        <h3 class="text-lg font-bold">半价 Plus · 代理拿货资格预检</h3>
+        <p class="text-sm text-muted-foreground">请提交客户授权的 ChatGPT Session。只有该账号实时符合半价资格，才可按代理拿货价下单；付款前系统会再次核验。</p>
+        <textarea v-model="wholesaleHalfInput" rows="5" autocomplete="off" class="w-full rounded-xl border bg-background p-3 text-sm" placeholder="粘贴完整 Session JSON" />
+        <p v-if="wholesaleHalfError" class="text-sm text-rose-600" role="alert">{{ wholesaleHalfError }}</p>
+        <div class="flex justify-end gap-3">
+          <button type="button" class="rounded-lg border px-4 py-2" @click="wholesaleHalfOpen = false">取消</button>
+          <button type="button" class="rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white disabled:opacity-50" :disabled="wholesaleHalfChecking || !wholesaleHalfInput.trim()" @click="checkWholesaleHalf">{{ wholesaleHalfChecking ? '正在核验…' : '核验并按拿货价下单' }}</button>
+        </div>
+      </div>
+    </div>
 
     <!-- QR Code Share Modal -->
     <div
@@ -1006,7 +1019,7 @@ import { useUserAuthStore } from '../stores/userAuth'
 import { useAppStore } from '../stores/app'
 import { productAPI } from '../api/product'
 import { affiliateAPI } from '../api/affiliate'
-import { userOrderAPI } from '../api/order'
+import { guestOrderAPI, userOrderAPI } from '../api/order'
 import { resellerAPI } from '../api/reseller'
 import ProductQuickBuy from '../components/ProductQuickBuy.vue'
 import { getImageUrl } from '../utils/image'
@@ -1065,6 +1078,15 @@ const tabs = [
 
 // 4 Agent Products (wholesale view)
 const agentProducts = ref([
+  {
+    slug: 'chatgpt-plus-half',
+    title: 'ChatGPT Plus · 半价资格专享',
+    descriptionKey: 'productCardCopy.subscriptionWarranty',
+    requirementTitleKey: 'productCardCopy.accountRequirement',
+    requirementKey: 'productCardCopy.plusRequirement',
+    retail: '',
+    agent: '',
+  },
   {
     slug: 'upstream-1-1109423947-1791826450925',
     title: 'ChatGPT Go · 1个月',
@@ -1349,11 +1371,16 @@ const withdrawForm = ref({
 // Quick Buy
 const quickBuyProduct = ref<any>(null)
 const quickBuyVisible = ref(false)
+const wholesaleHalfOpen = ref(false)
+const wholesaleHalfInput = ref('')
+const wholesaleHalfSession = ref('')
+const wholesaleHalfChecking = ref(false)
+const wholesaleHalfError = ref('')
 const fullProducts = ref<any[]>([])
 const productCatalogLoaded = ref(false)
 const configurableProductSlugs = ref(new Set<string>())
 const activeProductSlugs = computed(() => new Set(fullProducts.value.map((product) => String(product.slug || ''))))
-const visibleAgentProducts = computed(() => productCatalogLoaded.value ? agentProducts.value.filter((product) => activeProductSlugs.value.has(product.slug)) : [])
+const visibleAgentProducts = computed(() => productCatalogLoaded.value ? agentProducts.value.filter((product) => activeProductSlugs.value.has(product.slug) || (product.slug === 'chatgpt-plus-half' && configurableProductSlugs.value.has(product.slug))) : [])
 const visiblePricingProducts = computed(() => productCatalogLoaded.value ? pricingProducts.value.filter((product) => activeProductSlugs.value.has(product.slug) || (product.slug === 'chatgpt-plus-half' && configurableProductSlugs.value.has(product.slug))) : [])
 
 // Agent verification
@@ -1924,6 +1951,13 @@ const copyText = async (text: string, label: string) => {
 }
 
 const handleWholesaleBuy = (slug: string) => {
+  if (slug === 'chatgpt-plus-half') {
+    wholesaleHalfInput.value = ''
+    wholesaleHalfSession.value = ''
+    wholesaleHalfError.value = ''
+    wholesaleHalfOpen.value = true
+    return
+  }
   const found = fullProducts.value.find((p) => p.slug === slug)
   if (found) {
     const prices = wholesalePricesBySlug.value[slug] || {}
@@ -1949,6 +1983,33 @@ const handleWholesaleBuy = (slug: string) => {
         handleWholesaleBuy(slug)
       }
     })
+  }
+}
+
+const checkWholesaleHalf = async () => {
+  if (!userAuthStore.isAuthenticated || !currentAgentCode.value) return
+  wholesaleHalfChecking.value = true
+  wholesaleHalfError.value = ''
+  try {
+    const session = wholesaleHalfInput.value.trim()
+    const eligibility = (await guestOrderAPI.checkPlusHalfEligibility(session)).data.data
+    if (eligibility?.eligible !== true) {
+      wholesaleHalfError.value = '该账号不符合半价资格，不能按半价 Plus 拿货。'
+      return
+    }
+    sessionStorage.setItem('dj_agent_code', currentAgentCode.value)
+    const product = (await productAPI.detail('chatgpt-plus-half')).data.data
+    const sku = (product?.skus || []).find((row: any) => row.id === eligibility.sku_id && row.sku_code === 'plus_half' && row.is_active)
+    const price = wholesalePricesBySlug.value['chatgpt-plus-half']?.[Number(sku?.id)]
+    if (!product || !sku || product.id !== eligibility.product_id || !price) throw new Error('半价 Plus 代理拿货价不可用，请联系管理员。')
+    wholesaleHalfSession.value = session
+    quickBuyProduct.value = { ...product, price_amount: price, skus: [{ ...sku, price_amount: price }], agent_wholesale: true, agent_wholesale_agent_code: currentAgentCode.value }
+    wholesaleHalfOpen.value = false
+    quickBuyVisible.value = true
+  } catch (error: any) {
+    wholesaleHalfError.value = error?.message || '资格核验失败，请稍后重试。'
+  } finally {
+    wholesaleHalfChecking.value = false
   }
 }
 
@@ -2102,6 +2163,7 @@ const loadData = async () => {
           }
           const productPrice = Number(product.price_amount || match.suggestedPrice || 0)
           if (productPrice > 0) match.suggestedPrice = productPrice
+          if (agentProduct && productPrice > 0) agentProduct.retail = productPrice.toFixed(2)
           const configuredSetting = defaultSku?.setting || item.product_setting
           const configuredPrice = Number(configuredSetting?.fixed_price_amount || 0)
           if (configuredSetting?.pricing_mode === 'fixed_price' && configuredPrice > 0) {
