@@ -40,6 +40,7 @@ fi
 if [[ "${APPROVE_UI_CHANGE:-}" != "YES" ]]; then
   if ! python3 - "$repo_root" <<'PY'
 import hashlib
+import subprocess
 import sys
 from pathlib import Path
 
@@ -63,12 +64,19 @@ for rel_dir, manifest_name in checks:
             continue
         digest, filename = raw.split(None, 1)
         expected[filename.lstrip(" *")] = digest
-    actual_names = {
-        "./" + p.relative_to(base).as_posix()
-        for p in base.rglob("*")
-        if p.is_file() and "node_modules" not in p.relative_to(base).parts
-        and (rel_dir.startswith("internal/web/dist/") or "dist" not in p.relative_to(base).parts)
-    }
+    if rel_dir.startswith("frontend/"):
+        tracked = subprocess.check_output(
+            ["git", "ls-files", "--", rel_dir], cwd=root, text=True
+        ).splitlines()
+        actual_names = {
+            "./" + Path(name).relative_to(rel_dir).as_posix()
+            for name in tracked if (root / name).is_file()
+        }
+    else:
+        actual_names = {
+            "./" + p.relative_to(base).as_posix()
+            for p in base.rglob("*") if p.is_file()
+        }
     if actual_names != set(expected):
         missing = sorted(set(expected) - actual_names)[:5]
         extra = sorted(actual_names - set(expected))[:5]
