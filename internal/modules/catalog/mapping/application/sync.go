@@ -83,7 +83,7 @@ func (s *Service) SyncProduct(mappingID uint) error {
 	if localProduct != nil {
 		needsProductUpdate := false
 		// 同步人工交付表单配置
-		if upProduct.ManualFormSchema != nil {
+		if upProduct.ManualFormSchema != nil && !(conn.Protocol == constants.ConnectionProtocolZovoCard && localProduct.Slug == "chatgpt-plus-half") {
 			localProduct.ManualFormSchemaJSON = upProduct.ManualFormSchema
 			needsProductUpdate = true
 		}
@@ -141,7 +141,7 @@ func (s *Service) SyncProduct(mappingID uint) error {
 		// 同步本地 SKU 字段
 		localSKU, _ := s.skus.GetByID(skuMappings[i].LocalSKUID)
 		if localSKU != nil {
-			localSKU.SpecValuesJSON = preservePaymentRegions(localSKU.SpecValuesJSON, upSKU.SpecValues)
+			localSKU.SpecValuesJSON = syncedSpecValues(localSKU.SpecValuesJSON, upSKU.SpecValues, conn.Protocol, upSKU.SKUCode)
 			localSKU.IsActive = upSKU.IsActive
 			// 如果启用了自动同步价格，按加价比例更新本地售价和成本价
 			if conn.AutoSyncPrice {
@@ -164,7 +164,7 @@ func (s *Service) SyncProduct(mappingID uint) error {
 		newLocalSKU := productdomain.ProductSKU{
 			ProductID:       mapping.LocalProductID,
 			SKUCode:         upSKU.SKUCode,
-			SpecValuesJSON:  upSKU.SpecValues,
+			SpecValuesJSON:  syncedSpecValues(nil, upSKU.SpecValues, conn.Protocol, upSKU.SKUCode),
 			PriceAmount:     money.FromDecimal(localPrice.Round(2)),
 			CostPriceAmount: money.FromDecimal(convertCurrency(skuPrice, conn.ExchangeRate).Round(2)), // 成本价 = 上游价格 × 汇率（本地币种）
 			IsActive:        upSKU.IsActive,
@@ -235,6 +235,21 @@ func preservePaymentRegions(existing, incoming jsonmap.JSON) jsonmap.JSON {
 		return merged
 	}
 	return incoming
+}
+
+// The Plus half-price offer is sold and fulfilled only in PH/PHP. A supplier
+// catalog refresh must not turn its local SKU metadata into a region picker.
+func syncedSpecValues(existing, incoming jsonmap.JSON, protocol, skuCode string) jsonmap.JSON {
+	values := preservePaymentRegions(existing, incoming)
+	if protocol != constants.ConnectionProtocolZovoCard || skuCode != "plus_half" {
+		return values
+	}
+	result := make(jsonmap.JSON, len(values)+1)
+	for key, value := range values {
+		result[key] = value
+	}
+	result["payment_regions"] = []map[string]string{{"country": "PH", "currency": "PHP"}}
+	return result
 }
 
 func hasPaymentRegions(value interface{}) bool {
@@ -663,7 +678,7 @@ func (s *Service) syncProductFromData(mapping *mappingdomain.Mapping, conn *site
 		return
 	}
 
-	if upProduct.ManualFormSchema != nil {
+	if upProduct.ManualFormSchema != nil && !(conn.Protocol == constants.ConnectionProtocolZovoCard && localProduct.Slug == "chatgpt-plus-half") {
 		localProduct.ManualFormSchemaJSON = upProduct.ManualFormSchema
 		_ = s.products.Update(localProduct)
 	}
@@ -722,7 +737,7 @@ func (s *Service) syncProductFromData(mapping *mappingdomain.Mapping, conn *site
 
 		localSKU, _ := s.skus.GetByID(skuMappings[i].LocalSKUID)
 		if localSKU != nil {
-			localSKU.SpecValuesJSON = preservePaymentRegions(localSKU.SpecValuesJSON, upSKU.SpecValues)
+			localSKU.SpecValuesJSON = syncedSpecValues(localSKU.SpecValuesJSON, upSKU.SpecValues, conn.Protocol, upSKU.SKUCode)
 			localSKU.IsActive = upSKU.IsActive
 			if conn.AutoSyncPrice {
 				newLocalPrice := CalculateLocalPrice(upPrice, conn.ExchangeRate, conn.PriceMarkupPercent, conn.PriceRoundingMode)
@@ -751,7 +766,7 @@ func (s *Service) syncProductFromData(mapping *mappingdomain.Mapping, conn *site
 		newLocalSKU := productdomain.ProductSKU{
 			ProductID:       mapping.LocalProductID,
 			SKUCode:         upSKU.SKUCode,
-			SpecValuesJSON:  upSKU.SpecValues,
+			SpecValuesJSON:  syncedSpecValues(nil, upSKU.SpecValues, conn.Protocol, upSKU.SKUCode),
 			PriceAmount:     money.FromDecimal(localPrice.Round(2)),
 			CostPriceAmount: money.FromDecimal(convertCurrency(skuPrice, conn.ExchangeRate).Round(2)),
 			IsActive:        upSKU.IsActive,

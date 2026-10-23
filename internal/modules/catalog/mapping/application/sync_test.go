@@ -4,8 +4,23 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dujiao-next/internal/constants"
 	settingsintegration "github.com/dujiao-next/internal/modules/settings/schema/integration"
+	"github.com/dujiao-next/internal/shared/jsonmap"
 )
+
+func TestSyncedSpecValuesPlusHalfStaysInPhilippines(t *testing.T) {
+	existing := jsonmap.JSON{"payment_regions": []interface{}{map[string]interface{}{"country": "US", "currency": "USD"}}}
+	incoming := jsonmap.JSON{"plan": "plus_half", "payment_regions": []map[string]interface{}{{"country": "CL", "currency": "CLP"}}}
+	got := syncedSpecValues(existing, incoming, constants.ConnectionProtocolZovoCard, "plus_half")
+	regions, ok := got["payment_regions"].([]map[string]string)
+	if !ok || len(regions) != 1 || regions[0]["country"] != "PH" || regions[0]["currency"] != "PHP" {
+		t.Fatalf("expected only PH/PHP, got %#v", got["payment_regions"])
+	}
+	if got["plan"] != "plus_half" {
+		t.Fatalf("plan field was lost: %#v", got)
+	}
+}
 
 // fakeSettingsProvider 以固定同步间隔实现 SettingsProvider。
 type fakeSettingsProvider struct {
