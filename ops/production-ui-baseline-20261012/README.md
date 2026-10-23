@@ -19,5 +19,6 @@
 3. 门禁比较完整源码与嵌入资源清单，同时校验工作树干净、HEAD 含有共同基线祖先、线上二进制哈希未漂移。
 4. 用户授权 UI 改动时，仍需审阅改动范围；不得用授权标志掩盖未审阅 UI 差异。
 5. 发布前备份；完成后核对健康检查、页面与相关资源。
+6. 单二进制同时运行 API 和 worker 两个 systemd 服务。每次替换文件后都要重启 `dujiao-next` 与 `dujiao-next-worker`，再核对两个 `/proc/<pid>/exe` 的 SHA-256 与磁盘二进制相同；否则旧 worker 会继续覆盖商品同步数据并处理旧版履约任务。
 
 清单：`user-source.SHA256SUMS`、`admin-source.SHA256SUMS`、`user-dist.SHA256SUMS`、`admin-dist.SHA256SUMS`。`runtime-binary.sha256` 记录采样时运行版本，门禁使用操作者实时读取的值。

@@ -106,4 +106,16 @@ if [[ "$live_hash" != "$expected_lower" ]]; then
   exit 6
 fi
 
-echo "发布前检查通过：工作树干净，用户端资源基线符合策略，生产二进制与预期一致。"
+for unit in dujiao-next dujiao-next-worker; do
+  if ! process_hash="$(ssh -i "$ssh_key" -o BatchMode=yes -o ConnectTimeout=10 root@66.94.122.149 \
+    "sha256sum /proc/\$(systemctl show -p MainPID --value $unit)/exe" | cut -d' ' -f1)"; then
+    echo "拒绝发布：无法核对 $unit 正在运行的二进制。" >&2
+    exit 6
+  fi
+  if [[ "$process_hash" != "$live_hash" ]]; then
+    echo "拒绝发布：$unit 仍在运行旧版本（$process_hash），磁盘版本为 $live_hash。请先完成双进程版本核对。" >&2
+    exit 6
+  fi
+done
+
+echo "发布前检查通过：工作树干净，UI 基线符合策略，生产 API 与 worker 进程均使用预期二进制。"
