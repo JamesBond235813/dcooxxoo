@@ -108,7 +108,7 @@ import TurnstileCaptcha from './captcha/TurnstileCaptcha.vue'
 import ImageCaptcha from './captcha/ImageCaptcha.vue'
 import { usePaymentChannelsForDevice } from '../composables/usePaymentChannelsForDevice'
 
-const props = withDefaults(defineProps<{ product: any; visible: boolean; initialSkuId?: number; initialQuantity?: number; agentMode?: boolean }>(), { agentMode: false })
+const props = withDefaults(defineProps<{ product: any; visible: boolean; initialSkuId?: number; initialQuantity?: number; agentMode?: boolean; plusHalfSession?: string }>(), { agentMode: false })
 const emit = defineEmits<{ 'update:visible': [value: boolean] }>()
 const router = useRouter()
 const { t } = useI18n()
@@ -188,7 +188,15 @@ const toggleMobileTerm = (term: 'conditions' | 'warranty') => {
   warrantyOpen.value = activeMobileTerm.value === 'warranty'
 }
 const orderItems = () => [{ product_id: Number(props.product?.id), sku_id: selectedSkuId.value || undefined, quantity: Number(quantity.value), fulfillment_type: props.product?.fulfillment_type || undefined, agent_wholesale: Boolean(props.product?.agent_wholesale) || undefined }]
-const orderPayload = () => ({ items: orderItems(), email: guestEmail.value.trim(), affiliate_code: getAffiliateCode() || undefined, affiliate_visitor_key: getAffiliateVisitorKey() || undefined })
+const orderPayload = () => ({
+  items: orderItems(),
+  email: guestEmail.value.trim(),
+  affiliate_code: getAffiliateCode() || undefined,
+  affiliate_visitor_key: getAffiliateVisitorKey() || undefined,
+  manual_form_data: props.product?.agent_wholesale && selectedSku.value?.sku_code === 'plus_half' && props.plusHalfSession
+    ? { [String(props.product.id)]: { session: props.plusHalfSession } }
+    : undefined,
+})
 
 async function loadConfirmation() {
   if (!props.visible || !props.product) return
