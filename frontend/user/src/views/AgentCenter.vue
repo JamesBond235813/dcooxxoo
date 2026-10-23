@@ -560,7 +560,7 @@
                 <div class="flex items-start justify-between">
                   <div>
                     <div class="font-bold text-sm text-foreground">{{ prod.title }}</div>
-                    <div class="text-[11px] text-muted-foreground">{{ t(prod.descriptionKey) }}</div>
+                    <div class="text-[11px] text-muted-foreground">{{ prod.slug === 'chatgpt-plus-half' ? '客户须先通过首页 Banner 的 Session 资格预检，合格后按此售价下单。' : t(prod.descriptionKey) }}</div>
                   </div>
                   <span class="text-[11px] font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">
                     底价 ¥{{ prod.basePrice }}
@@ -1144,6 +1144,16 @@ const pricingProducts = ref([
     customPrice: '',
   },
   {
+    id: 21,
+    skuId: 2002,
+    slug: 'chatgpt-plus-half',
+    title: 'ChatGPT Plus · 半价资格专享',
+    descriptionKey: 'productCardCopy.subscriptionWarranty',
+    basePrice: 0,
+    suggestedPrice: 0,
+    customPrice: '',
+  },
+  {
     id: 2,
     skuId: 2,
     slug: 'chatgpt-pro-5x-1m',
@@ -1341,9 +1351,10 @@ const quickBuyProduct = ref<any>(null)
 const quickBuyVisible = ref(false)
 const fullProducts = ref<any[]>([])
 const productCatalogLoaded = ref(false)
+const configurableProductSlugs = ref(new Set<string>())
 const activeProductSlugs = computed(() => new Set(fullProducts.value.map((product) => String(product.slug || ''))))
 const visibleAgentProducts = computed(() => productCatalogLoaded.value ? agentProducts.value.filter((product) => activeProductSlugs.value.has(product.slug)) : [])
-const visiblePricingProducts = computed(() => productCatalogLoaded.value ? pricingProducts.value.filter((product) => activeProductSlugs.value.has(product.slug)) : [])
+const visiblePricingProducts = computed(() => productCatalogLoaded.value ? pricingProducts.value.filter((product) => activeProductSlugs.value.has(product.slug) || (product.slug === 'chatgpt-plus-half' && configurableProductSlugs.value.has(product.slug))) : [])
 
 // Agent verification
 const agentIdentityActive = ref(false)
@@ -2023,6 +2034,7 @@ const handleApplyWithdraw = async () => {
 
 const loadData = async () => {
   productCatalogLoaded.value = false
+  configurableProductSlugs.value = new Set()
   try {
     const res = await productAPI.list({ page: 1, page_size: 20 }, { skipAgentCode: true })
     const pList = res.data?.data || []
@@ -2063,10 +2075,11 @@ const loadData = async () => {
       if (!currentAgentCode.value) throw new Error('未能读取代理专属代码，请刷新页面或联系管理员。')
 
       // 2. 获取商品当前分销定价
-      const settingsRes = await resellerAPI.productSettings()
+      const settingsRes = await resellerAPI.productSettings({ page: 1, page_size: 100 })
       pricingSettingsLoaded = true
       if (settingsRes.data?.data) {
         const list = settingsRes.data.data.list || settingsRes.data.data || []
+        configurableProductSlugs.value = new Set(list.map((item: any) => String(item.product?.slug || '')))
         for (const item of list) {
           const product = item.product || {}
           const match = pricingProducts.value.find((p) => p.slug === product.slug)
