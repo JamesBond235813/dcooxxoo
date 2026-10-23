@@ -37,6 +37,28 @@ if [[ -n "$(git status --porcelain --untracked-files=all)" ]]; then
   exit 3
 fi
 
+# The embedded admin SPA must be built with VITE_FULLSTACK=1. A development
+# build points at /assets and leaves the production admin page blank.
+if ! python3 - "$repo_root/internal/web/dist/admin" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+index = root / "index.html"
+html = index.read_text() if index.is_file() else ""
+if '<base href="__DJ_ADMIN_BASE__/">' not in html:
+    print("拒绝发布：管理端缺少生产 base 占位符，请运行 pnpm build:fullstack。", file=sys.stderr)
+    sys.exit(1)
+assets = re.findall(r'(?:src|href)="(\./assets/[^"]+)"', html)
+if not assets or any(not (root / asset).is_file() for asset in assets):
+    print("拒绝发布：管理端入口引用的静态资源缺失。", file=sys.stderr)
+    sys.exit(1)
+PY
+then
+  exit 5
+fi
+
 if [[ "${APPROVE_UI_CHANGE:-}" != "YES" ]]; then
   if ! python3 - "$repo_root" <<'PY'
 import hashlib
