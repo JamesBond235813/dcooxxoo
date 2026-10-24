@@ -354,15 +354,20 @@ func collectUpstreamInventoryAlertRows(product productdomain.Product, skuMapping
 	// 没有启用 SKU 的情况
 	if len(activeSKUs) == 0 {
 		totalStock := int64(0)
+		hasUnlimited := false
 		for _, mapping := range mappingByLocalSKU {
 			if !mapping.UpstreamIsActive {
 				continue
 			}
 			stock := int64(mapping.UpstreamStock)
 			if stock < 0 {
-				stock = 0
+				hasUnlimited = true
+				break
 			}
 			totalStock += stock
+		}
+		if hasUnlimited {
+			return result
 		}
 		if alertType := classifyInventoryAlertType(totalStock, lowStockThreshold); alertType != "" {
 			result = append(result, dashboard.InventoryAlertRow{
@@ -384,7 +389,9 @@ func collectUpstreamInventoryAlertRows(product productdomain.Product, skuMapping
 		}
 		available := int64(mapping.UpstreamStock)
 		if available < 0 {
-			available = 0
+			// Negative upstream stock means on-demand, unlimited inventory.
+			// The storefront and order validation use the same contract.
+			continue
 		}
 		if alertType := classifyInventoryAlertType(available, lowStockThreshold); alertType != "" {
 			result = append(result, dashboard.InventoryAlertRow{
